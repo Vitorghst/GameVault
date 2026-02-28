@@ -1,3 +1,9 @@
+// 🚨 FORÇAR DNS ANTES DE TUDO
+const dns = require('dns');
+dns.setServers(['8.8.8.8', '8.8.4.4']);
+console.log('📡 DNS configurado:', dns.getServers());
+
+// Depois os requires normais
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -10,30 +16,27 @@ dotenv.config();
 
 const app = express();
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Rotas
 app.use('/api/auth', authRoutes);
 app.use('/api/games', gameRoutes);
 app.use('/api/users', userRoutes);
 
-// Rota de teste
 app.get('/', (req, res) => {
-    res.json({ message: 'API da Coleção de Jogos funcionando!' });
+    res.json({ message: 'API funcionando!' });
 });
 
 const PORT = process.env.PORT || 3000;
 
-// Conectar ao MongoDB e iniciar servidor
+// Conexão simplificada
 mongoose.connect(process.env.MONGODB_URI)
-    .then(() => {
-        console.log('✅ Conectado ao MongoDB');
-        app.listen(PORT, () => {
-            console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
-        });
-    })
-    .catch(err => {
-        console.error('❌ Erro no MongoDB:', err);
+  .then(() => {
+    console.log('✅ Conectado ao MongoDB');
+    app.listen(PORT, () => {
+      console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
     });
+  })
+  .catch(err => {
+    console.error('❌ Erro no MongoDB:', err.message);
+  });
