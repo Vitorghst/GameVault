@@ -3,7 +3,7 @@ import axios from 'axios';
 // 👇 URL dinâmica: local em desenvolvimento, Render em produção
 const baseURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:3000/api'
-  : 'https://SEU_BACKEND_NO_RENDER.onrender.com/api'; // Depois de fazer o deploy, troque aqui!
+  : 'https://gamevault-backend-kumn.onrender.com/api'; // Depois de fazer o deploy, troque aqui!
 
 const api = axios.create({
   baseURL,
