@@ -15,6 +15,10 @@ const gameSchema = new mongoose.Schema({
         required: true
     },
     cover: String,
+     platforms: [{
+        id: Number,
+        name: String
+    }],
     status: {
         type: String,
         enum: ['jogando', 'zerado', 'abandonado', 'quero jogar', 'favorito'],

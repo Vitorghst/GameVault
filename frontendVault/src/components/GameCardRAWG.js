@@ -1,5 +1,15 @@
 import React from "react";
 import { FaClock, FaTrophy, FaStar, FaHeart } from "react-icons/fa";
+import {
+  FaWindows,
+  FaPlaystation,
+  FaXbox,
+  FaApple,
+  FaLinux,
+  FaAndroid,
+  FaGlobe,
+} from "react-icons/fa";
+import { SiNintendoswitch, SiMacos } from "react-icons/si";
 
 const GameCardRAWG = ({ game, onClick }) => {
   const getStatusClass = (status) => {
@@ -116,12 +126,79 @@ const GameCardRAWG = ({ game, onClick }) => {
           </div>
         )}
 
-        {/* Botão de adicionar (para resultados de busca) */}
-        {isSearchResult && (
-          <button className="suggested-user-follow-btn">
-            + Adicionar à coleção
-          </button>
+        {game.platforms && game.platforms.length > 0 && (
+          <div className="game-platforms">
+            {game.platforms.slice(0, 4).map((platform) => {
+              const getPlatformIcon = (id) => {
+                switch (id) {
+                  // PC
+                  case 6:
+                    return <FaWindows />;
+                  // PlayStation
+                  case 48:
+                  case 167:
+                  case 7:
+                  case 8:
+                  case 9:
+                    return <FaPlaystation />;
+                  // Xbox
+                  case 49:
+                  case 169:
+                  case 12:
+                  case 11:
+                    return <FaXbox />;
+                  // Nintendo
+                  case 130:
+                  case 4:
+                  case 41:
+                  case 5:
+                    return <SiNintendoswitch />;
+                  // Apple / Mac
+                  case 14:
+                    return <SiMacos />;
+                  case 39:
+                    return <FaApple />;
+                  // Linux / Android
+                  case 3:
+                    return <FaLinux />;
+                  case 34:
+                    return <FaAndroid />;
+                  // Web
+                  case 82:
+                    return <FaGlobe />;
+                  default:
+                    return null;
+                }
+              };
+
+              const icon = getPlatformIcon(platform.id);
+
+              return icon ? (
+                <div
+                  key={platform.id}
+                  className="platform-icon"
+                  title={platform.name}
+                >
+                  {icon}
+                </div>
+              ) : null;
+            })}
+            {game.platforms.length > 4 && (
+              <span className="platform-more">
+                +{game.platforms.length - 4}
+              </span>
+            )}
+          </div>
         )}
+
+        {/* Botão de adicionar (para resultados de busca) */}
+        {isSearchResult &&
+          game.first_release_date &&
+          game.first_release_date * 1000 < Date.now() && (
+            <button className="suggested-user-follow-btn">
+              + Adicionar à coleção
+            </button>
+          )}
       </div>
 
       {/* Efeito de hover gradient */}

@@ -381,7 +381,8 @@ body {
 }
 
 .stat-block-icon {
-  font-size: 60px;
+  font-size: 79px;
+  height: 70px;
   color: var(--primary);
   background: rgba(139, 92, 246, 0.1);
   padding: 16px;
@@ -3752,5 +3753,49 @@ a:active,
   
   .stat-value {
     font-size: 12px;
+  }
+}
+
+.game-platforms {
+  display: flex;
+  gap: 8px;
+  margin: 8px 0;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.platform-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--dark-4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gray-1);
+  font-size: 16px;
+  transition: all 0.2s;
+}
+
+.platform-icon:hover {
+  color: var(--primary);
+  transform: translateY(-2px);
+  background: var(--dark-3);
+}
+
+.platform-more {
+  font-size: 11px;
+  color: var(--gray-2);
+  background: var(--dark-4);
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .platform-icon {
+    width: 24px;
+    height: 24px;
+    font-size: 14px;
   }
 }
