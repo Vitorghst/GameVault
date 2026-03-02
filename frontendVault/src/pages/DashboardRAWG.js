@@ -122,14 +122,18 @@ const DashboardRAWG = () => {
   };
 
   const handleSaveGame = async (gameData) => {
+    console.log(gameData)
     try {
       if (gameData._id) {
         await api.put(`/games/${gameData._id}`, gameData);
       } else {
+        const coverUrl = gameData.cover?.url || '';
+        const processedCover = coverUrl.replace('t_thumb', 't_cover_big');
+        
         await api.post('/games/add', {
           igdbId: gameData.igdbId,
           name: gameData.name,
-          cover: gameData.cover,
+          cover: processedCover,
           status: gameData.status,
           hoursPlayed: gameData.hoursPlayed,
           achievements: gameData.achievements,

@@ -103,7 +103,7 @@ const Profile = () => {
             </div>
             {isOwnProfile && (
               <button className="profile-edit-btn">
-                <FaEdit /> Editar Perfil
+                <span className='edit-icon'><FaEdit /></span>
               </button>
             )}
           </div>
@@ -111,7 +111,7 @@ const Profile = () => {
           <div className="profile-info">
             <h1 className="profile-name">
               {profile?.username || currentUser?.username}
-              {isOwnProfile && <span className="profile-badge">⚡ Você</span>}
+              {isOwnProfile && <span className="profile-badge" style={{marginLeft: '8px'}}>⚡ Você</span>}
             </h1>
             <p className="profile-bio">
               {profile?.bio || 'Sem bio definida'}
@@ -214,14 +214,14 @@ const Profile = () => {
         >
           👥 Amigos (128)
         </button>
-        {isOwnProfile && (
+        {/* {isOwnProfile && (
           <button 
             className={`profile-tab ${activeTab === 'config' ? 'active' : ''}`}
             onClick={() => setActiveTab('config')}
           >
             ⚙️ Configurações
           </button>
-        )}
+        )} */}
       </div>
 
       <div className="main-content-rawg">

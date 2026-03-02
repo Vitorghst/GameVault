@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { 
@@ -11,13 +11,16 @@ import {
   FiSettings,
   FiLogOut,
   FiUser,
-  FiTrendingUp
+  FiTrendingUp,
+  FiMenu,
+  FiX
 } from 'react-icons/fi';
 import { SiRepublicofgamers } from "react-icons/si";
 
-const Navbar = ({ children }) => {  // 👈 RECEBE CHILDREN
+const Navbar = ({ children }) => {
   const { user, logout } = useAuth();
   const location = useLocation();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const menuItems = [
     { path: '/dashboard', icon: <FiHome />, label: 'Início' },
@@ -30,17 +33,33 @@ const Navbar = ({ children }) => {  // 👈 RECEBE CHILDREN
 
   const isActive = (path) => location.pathname === path;
 
+  const toggleMenu = () => {
+    setMenuOpen(!menuOpen);
+  };
+
+  const closeMenu = () => {
+    setMenuOpen(false);
+  };
+
   return (
-    <div className="app-with-sidebar">  {/* 👈 CONTAINER PRINCIPAL */}
+    <div className="app-with-sidebar">
       
+      {/* Botão do menu hambúrguer (só aparece no mobile) */}
+      <button className="mobile-menu-toggle" onClick={toggleMenu}>
+        {menuOpen ? <FiX /> : <FiMenu />}
+      </button>
+
       {/* Overlay para mobile */}
-      <div className="sidebar-overlay"></div>
+      <div 
+        className={`sidebar-overlay ${menuOpen ? 'active' : ''}`} 
+        onClick={closeMenu}
+      ></div>
       
       {/* Sidebar */}
-      <div className="vertical-navbar">
+      <div className={`vertical-navbar ${menuOpen ? 'open' : ''}`}>
         {/* Logo */}
         <div className="vertical-navbar-logo">
-          <Link to="/dashboard">
+          <Link to="/dashboard" onClick={closeMenu}>
             <span className="logo-icon"><SiRepublicofgamers /></span>
             <span className="logo-text">GameVault</span>
           </Link>
@@ -64,6 +83,7 @@ const Navbar = ({ children }) => {  // 👈 RECEBE CHILDREN
               key={item.path}
               to={item.path}
               className={`vertical-nav-item ${isActive(item.path) ? 'active' : ''}`}
+              onClick={closeMenu}
             >
               <span className="nav-icon">{item.icon}</span>
               <span className="nav-label">{item.label}</span>
@@ -73,7 +93,7 @@ const Navbar = ({ children }) => {  // 👈 RECEBE CHILDREN
 
         {/* Configurações e Sair */}
         <div className="vertical-navbar-footer">
-          <Link to="/configuracoes" className="vertical-nav-item">
+          <Link to="/configuracoes" className="vertical-nav-item" onClick={closeMenu}>
             <FiSettings className="nav-icon" />
             <span className="nav-label">Configurações</span>
           </Link>
@@ -84,9 +104,9 @@ const Navbar = ({ children }) => {  // 👈 RECEBE CHILDREN
         </div>
       </div>
 
-      {/* Conteúdo principal com margem - RECEBE OS CHILDREN */}
+      {/* Conteúdo principal */}
       <div className="main-content-with-sidebar">
-        {children}  {/* 👈 É AQUI QUE O CONTEÚDO DAS PÁGINAS APARECE */}
+        {children}
       </div>
 
     </div>

@@ -381,7 +381,7 @@ body {
 }
 
 .stat-block-icon {
-  font-size: 36px;
+  font-size: 60px;
   color: var(--primary);
   background: rgba(139, 92, 246, 0.1);
   padding: 16px;
@@ -843,14 +843,32 @@ body {
   background: var(--dark-3);
   border: 1px solid var(--glass-border);
   border-radius: 32px;
-  padding: 40px;
+  padding: 29px 12px 20px 24px;
   max-width: 500px;
   width: 90%;
   max-height: 85vh;
-  overflow-y: auto;
   animation: slideUp 0.4s ease;
   box-shadow: var(--shadow-2xl);
   position: relative;
+}
+
+.edit-add {
+  overflow-y: auto;
+  max-height: 72vh;
+}
+
+/* Personaliza a barra de rolagem */
+.edit-add::-webkit-scrollbar {
+  width: 8px;
+}
+
+.edit-add::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.edit-add::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 4px;
 }
 
 @keyframes slideUp {
@@ -1182,16 +1200,29 @@ body {
   color: white;
   font-size: 18px;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.3s ease;
   box-shadow: var(--shadow-lg);
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0;           /* Remove qualquer padding extra */
+  margin: 0; 
 }
 
 .profile-edit-btn:hover {
-  transform: scale(1.1) rotate(90deg);
+  transform: scale(1.1);
   box-shadow: var(--shadow-glow);
+}
+
+.edit-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 20px;
+  margin: 1px 2px 1px 4px;
+  line-height: 1;
 }
 
 .profile-info {
@@ -1244,15 +1275,32 @@ body {
   font-size: 18px;
 }
 
-/* Profile Stats Grid */
 .profile-stats-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 20px;
-  padding: 32px;
+  grid-template-columns: repeat(6, minmax(140px, 1fr)); /* 👈 Largura MÍNIMA de 140px */
+  gap: 16px;
+  padding: 24px 32px;
   background: var(--dark-2);
   border-bottom: 1px solid var(--glass-border);
+  width: 100%;
+  overflow-x: auto; /* 👈 Se não couber, cria scroll horizontal */
 }
+
+/* Cards com tamanho fixo mínimo */
+.profile-stat-card {
+  min-width: 140px; /* 👈 GARANTE QUE NÃO FIQUE MENOR QUE ISSO */
+  background: var(--card-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: all 0.3s;
+  backdrop-filter: blur(10px);
+  box-sizing: border-box;
+}
+
 
 .profile-stat-card {
   background: var(--card-bg);
@@ -1323,6 +1371,46 @@ body {
   transition: all 0.3s;
   position: relative;
   overflow: hidden;
+}
+
+@media (min-width: 1400px) {
+  .profile-stats-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+/* NOTEBOOK (até 1399px) - 3 colunas */
+@media (max-width: 1399px) {
+  .profile-stats-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
+/* Desktop MÉDIO / NOTEBOOK (901px - 1200px) - 3 colunas (2 linhas) */
+@media (min-width: 901px) and (max-width: 1200px) {
+  .profile-stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    padding: 28px;
+  }
+}
+
+/* Tablet (601px - 900px) - 2 colunas */
+@media (min-width: 601px) and (max-width: 900px) {
+  .profile-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    padding: 24px;
+  }
+}
+
+/* Mobile (até 600px) - 1 coluna */
+@media (max-width: 600px) {
+  .profile-stats-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 16px;
+  }
 }
 
 .profile-tab::before {
@@ -1559,12 +1647,6 @@ body {
   box-shadow: var(--shadow-glow);
 }
 
-/* Responsive */
-@media (max-width: 1200px) {
-  .profile-stats-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
 
 @media (max-width: 1024px) {
   .profile-hero-content {
@@ -1588,34 +1670,6 @@ body {
 
   .profile-tab {
     white-space: nowrap;
-  }
-}
-
-@media (max-width: 768px) {
-  .profile-stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .friends-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 480px) {
-  .profile-stats-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .profile-name {
-    font-size: 32px;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .profile-meta {
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
   }
 }
 
@@ -2766,33 +2820,32 @@ body {
 
 .logo-icon {
   font-size: 40px;
-  color: var(--primary);  /* Cor sólida como fallback */
+  color: var(--primary); /* Cor sólida como fallback */
   filter: drop-shadow(0 0 10px var(--primary));
   animation: float 3s ease-in-out infinite;
 }
 
 .logo-collection {
   font-size: 30px;
-  color: var(--primary);  /* Cor sólida como fallback */
+  color: var(--primary); /* Cor sólida como fallback */
   filter: drop-shadow(0 0 10px var(--primary));
 }
 
-
 .logo-explorar {
   font-size: 16px;
-  color: var(--primary);  /* Cor sólida como fallback */
+  color: var(--primary); /* Cor sólida como fallback */
   filter: drop-shadow(0 0 10px var(--primary));
 }
 
 .logo-finalizado {
   font-size: 22px;
-  color: green; 
+  color: green;
   filter: drop-shadow(0 0 10px green);
 }
 
 .logo-quero {
   font-size: 22px;
-  color: rgb(188, 174, 18); 
+  color: rgb(188, 174, 18);
   filter: drop-shadow(0 0 10px rgb(188, 173, 7));
 }
 
@@ -2874,7 +2927,6 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
 
 .vertical-nav-item {
   display: flex;
@@ -2981,7 +3033,6 @@ body {
   background: var(--secondary);
 }
 
-
 /* Container principal da sidebar */
 .vertical-navbar {
   width: 280px;
@@ -3000,23 +3051,6 @@ body {
   box-shadow: var(--shadow-2xl);
   animation: slideIn 0.3s ease;
   overflow: hidden; /* 👈 Esconde qualquer overflow do container */
-}
-
-/* Para telas menores */
-@media (max-width: 1024px) {
-  .vertical-navbar {
-    width: 80px;
-    padding: 20px 8px;
-  }
-
-  .vertical-nav-item {
-    justify-content: center;
-    padding: 12px 0; /* 👈 Ajuste no padding pra não criar scroll */
-  }
-
-  .nav-label {
-    display: none;
-  }
 }
 
 /* Footer da sidebar */
@@ -3042,84 +3076,6 @@ body {
   background: var(--dark-1);
 }
 
-/* Overlay para mobile */
-.sidebar-overlay {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-  z-index: 999;
-}
-
-/* Responsive */
-@media (max-width: 1024px) {
-  .vertical-navbar {
-    width: 80px;
-    padding: 20px 8px;
-  }
-
-  .logo-text,
-  .profile-info,
-  .nav-label {
-    display: none;
-  }
-
-  .vertical-navbar-logo {
-    padding: 8px 0 24px;
-    text-align: center;
-  }
-
-  .logo-icon {
-    font-size: 32px;
-  }
-
-  .vertical-navbar-profile {
-    justify-content: center;
-    padding: 12px 0;
-  }
-
-  .profile-avatar {
-    margin: 0;
-  }
-
-  .vertical-nav-item {
-    justify-content: center;
-    padding: 12px;
-  }
-
-  .nav-icon {
-    font-size: 22px;
-    min-width: auto;
-  }
-
-  .main-content-with-sidebar {
-    margin-left: 80px;
-  }
-}
-
-@media (max-width: 768px) {
-  .vertical-navbar {
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
-  }
-
-  .vertical-navbar.open {
-    transform: translateX(0);
-  }
-
-  .sidebar-overlay.active {
-    display: block;
-  }
-
-  .main-content-with-sidebar {
-    margin-left: 0;
-  }
-}
-
 /* Scrollbar personalizada para a sidebar */
 .vertical-navbar-menu::-webkit-scrollbar {
   width: 4px;
@@ -3136,4 +3092,665 @@ body {
 
 .vertical-navbar-menu::-webkit-scrollbar-thumb:hover {
   background: var(--primary);
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 24px;
+  }
+
+  .hero-subtitle {
+    font-size: 13px;
+  }
+
+  .stats-bar {
+    grid-template-columns: 1fr;
+  }
+
+  .games-grid-rawg {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .game-card {
+    display: flex;
+    flex-direction: row;
+    height: 120px;
+  }
+
+  .game-card-image-container {
+    width: 80px;
+    height: 120px;
+    aspect-ratio: auto;
+  }
+
+  .game-card-content {
+    flex: 1;
+    padding: 12px;
+  }
+
+  .game-card-title {
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+
+  .game-card-meta {
+    margin-bottom: 8px;
+  }
+
+  .game-card-stats {
+    margin-top: 4px;
+    padding-top: 4px;
+  }
+
+  .game-card-status {
+    font-size: 8px;
+    padding: 2px 6px;
+    bottom: 4px;
+    left: 4px;
+  }
+
+  .game-card-rating {
+    width: 28px;
+    height: 28px;
+    font-size: 10px;
+    top: 4px;
+    right: 4px;
+  }
+
+  .empty-collection h3 {
+    font-size: 18px;
+  }
+}
+
+/* ========== MOBILE MENU ========== */
+
+/* Botão do menu hambúrguer */
+.mobile-menu-toggle {
+  position: fixed;
+  top: 16px;
+  right: 16px;  /* 👈 AGORA NA DIREITA! */
+  left: auto;   /* 👈 GARANTE QUE NÃO FIQUE NOS DOIS LADOS */
+  z-index: 1002;
+  background: linear-gradient(135deg, #8b5cf6, #ec4899);
+  border: none;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 10px 25px -5px rgba(139, 92, 246, 0.5);
+  transition: all 0.3s ease;
+}
+
+.mobile-menu-toggle:hover {
+  transform: scale(1.1);
+  box-shadow: 0 20px 30px -10px rgba(139, 92, 246, 0.7);
+}
+
+/* Overlay */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+}
+
+.sidebar-overlay.active {
+  display: block;
+}
+
+/* ========== MEDIA QUERY PARA MOBILE ========== */
+@media (max-width: 768px) {
+  /* Mostra o botão do menu */
+  .mobile-menu-toggle {
+    display: flex;
+  }
+
+  /* Sidebar no mobile */
+  .vertical-navbar {
+    position: fixed;
+    left: -280px;
+    top: 0;
+    bottom: 0;
+    width: 280px;
+    z-index: 1001;
+    transition: left 0.3s ease;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  }
+
+  .vertical-navbar.open {
+    left: 0;
+  }
+
+  /* Ajuste no conteúdo principal */
+  .main-content-with-sidebar {
+    margin-left: 0 !important;
+    padding: 20px;
+    padding-top: 80px !important;
+  }
+
+  /* Ajustes nos elementos da sidebar */
+  .vertical-navbar-logo {
+    padding: 20px 16px;
+  }
+
+  .vertical-navbar-profile {
+    padding: 16px;
+    margin: 0 12px 20px;
+  }
+
+  .profile-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+
+  .profile-name {
+    font-size: 14px;
+  }
+
+  .profile-email {
+    font-size: 11px;
+  }
+
+  .vertical-navbar-menu {
+    padding: 0 12px;
+  }
+
+  .vertical-nav-item {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .nav-icon {
+    font-size: 16px;
+  }
+
+  /* Footer da sidebar - opcional */
+  .vertical-navbar-footer {
+    padding: 16px 12px;
+  }
+}
+
+/* ========== CORREÇÃO MOBILE - MOSTRAR TEXTOS QUANDO O MENU ESTIVER ABERTO ========== */
+@media (max-width: 1024px) {
+  /* Quando a sidebar está aberta, mostra os textos */
+  .vertical-navbar.open .nav-label {
+    display: inline-block !important;
+  }
+  
+  .vertical-navbar.open .vertical-nav-item {
+    justify-content: flex-start;
+    padding: 12px 16px;
+  }
+  
+  /* Ajusta a largura quando aberta */
+  .vertical-navbar.open {
+    width: 280px;
+  }
+}
+
+/* Ajuste específico para mobile pequeno */
+@media (max-width: 768px) {
+  /* Garante que quando aberto, mostre os textos */
+  .vertical-navbar.open .nav-label {
+    display: inline-block !important;
+  }
+}
+
+@media (max-width: 768px) {
+  
+  /* Remove a margem esquerda no mobile */
+  .main-content-with-sidebar {
+    margin-left: 0 !important;
+    padding: 20px;
+    padding-top: 80px; /* Espaço para o botão do menu */
+    width: 100%;
+  }
+  
+  /* Ajusta o hero search para ocupar toda largura */
+  .hero-search {
+    padding: 40px 16px;
+    width: 100%;
+  }
+  
+  .hero-content {
+    max-width: 100%;
+    padding: 0;
+  }
+  
+  .hero-title {
+    font-size: 28px;
+    text-align: center;
+  }
+  
+  .hero-subtitle {
+    font-size: 14px;
+    text-align: center;
+  }
+  
+  /* Centraliza a barra de busca */
+  .hero-search-box {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto 20px;
+  }
+  
+  /* Centraliza os trends */
+  .search-trends {
+    justify-content: center;
+    width: 100%;
+  }
+  
+  /* Stats bar em grid de 2 colunas */
+  .stats-bar {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 16px;
+  }
+  
+  /* Tabs ocupando toda largura */
+  .dashboard-tabs {
+    padding: 0 16px;
+    width: 100%;
+  }
+  
+  .tab-btn {
+    flex: 1;
+    text-align: center;
+  }
+}
+
+
+@media (max-width: 480px) {
+  
+  .main-content-with-sidebar {
+    padding: 16px;
+    padding-top: 70px;
+  }
+  
+  .stats-bar {
+    grid-template-columns: 1fr; /* Uma coluna só */
+  }
+  
+  .hero-title {
+    font-size: 24px;
+  }
+  
+  .hero-search-box input {
+    padding: 14px 18px;
+  }
+  
+  .hero-search-box button {
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+  
+  .search-trends button {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+}
+
+* {
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  outline: none !important;
+}
+
+/* Mantém a seleção de texto onde necessário */
+input, textarea, [contenteditable="true"] {
+  -webkit-user-select: text !important;
+  user-select: text !important;
+  -webkit-touch-callout: default !important;
+}
+
+/* Remove outline de foco em elementos clicáveis */
+button:focus,
+a:focus,
+[role="button"]:focus,
+button:active,
+a:active,
+[role="button"]:active {
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* ========== MOBILE FIX - CARDS NÃO CORTAM ========== */
+@media (max-width: 600px) {
+  
+  /* Grid em 1 coluna */
+  .profile-stats-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px;
+    padding: 12px;
+  }
+  
+  /* Cards ocupando toda largura */
+  .profile-stat-card {
+    width: 100%;
+    min-width: 100%;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  
+  /* Ícone mantém tamanho */
+  .profile-stat-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  
+  /* Info ocupa o resto */
+  .profile-stat-info {
+    flex: 1;
+    min-width: 0; /* Permite que o texto seja comprimido */
+  }
+  
+  /* Valores e labels em linha ou coluna? */
+  .profile-stat-value {
+    font-size: 20px;
+    margin-bottom: 2px;
+    white-space: normal; /* 👈 Permite quebra se necessário */
+    word-break: break-word;
+  }
+  
+  .profile-stat-label {
+    font-size: 13px;
+    white-space: normal;
+    word-break: break-word;
+  }
+}
+
+/* Ajuste extra para telas muito pequenas */
+@media (max-width: 380px) {
+  .profile-stat-card {
+    padding: 12px;
+    gap: 12px;
+  }
+  
+  .profile-stat-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+  
+  .profile-stat-value {
+    font-size: 18px;
+  }
+  
+  .profile-stat-label {
+    font-size: 12px;
+  }
+}
+
+/* ========== AJUSTE MOBILE PARA CARDS ========== */
+@media (max-width: 768px) {
+  
+   .game-card-image-container {
+    width: 100%;
+    height: auto; /* Altura automática */
+    aspect-ratio: 3/4; /* Proporção padrão de capa de jogo */
+    background: var(--dark-3);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Imagem ocupando TODO o espaço disponível */
+  .game-card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Volta para COVER */
+    object-position: center;
+    display: block;
+  }
+  
+  /* Fallback se imagem não carregar */
+  .game-card-image[src*="placeholder"] {
+    object-fit: contain;
+    padding: 20px;
+  }
+  
+  /* Ajuste no card */
+  .game-card-rawg {
+    display: flex;
+    flex-direction: column;
+    height: auto; /* Altura determinada pelo conteúdo */
+  }
+  
+  .game-card-content {
+    padding: 12px;
+  }
+  
+  .game-card-title {
+    font-size: 14px;
+    margin-bottom: 8px;
+    min-height: auto;
+  }
+  
+  /* Esconde meta info se não couber */
+  .game-card-meta {
+    display: none;
+  }
+  
+  /* Botão menor */
+  .add-game-btn {
+    padding: 6px;
+    font-size: 11px;
+  }
+}
+
+/* Ajuste para celular pequeno */
+@media (max-width: 480px) {
+  .games-grid-rawg {
+    grid-template-columns: 1fr !important; /* 1 coluna */
+  }
+  
+  .game-card-image-container {
+    height: 200px;
+  }
+}
+
+.star-rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 12px;
+  background: var(--dark-3);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+}
+
+.star {
+  font-size: 32px;
+  cursor: pointer;
+  transition: transform 0.2s;
+  position: relative;
+  display: inline-block;
+  color: var(--gray-2); /* Cor da estrela vazia */
+}
+
+/* Estrela cheia */
+.star.full {
+  color: #ffd700;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+/* Estrela meia */
+.star.half {
+  color: var(--gray-2); /* Fundo cinza */
+  position: relative;
+}
+
+.star.half::before {
+  content: "★";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 50%; /* Metade da largura */
+  overflow: hidden;
+  color: #ffd700; /* Cor dourada */
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+/* Efeito hover */
+.star:hover {
+  transform: scale(1.2);
+}
+
+/* Valor numérico */
+.rating-value {
+  margin-left: auto;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--light-1);
+  background: var(--dark-4);
+  padding: 4px 12px;
+  border-radius: 30px;
+  min-width: 45px;
+  text-align: center;
+}
+
+/* ========== GAME STATS RAWG ========== */
+
+/* Container principal */
+.game-stats-rawg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--glass-border);
+}
+
+/* Estilo dos cards de estatística (Versão 1) */
+.stat-item-rawg {
+  flex: 1;
+  min-width: 80px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--dark-4);
+  border-radius: 12px;
+  transition: all 0.3s;
+  border: 1px solid transparent;
+}
+
+.stat-item-rawg:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary);
+  box-shadow: 0 5px 15px rgba(139, 92, 246, 0.2);
+}
+
+/* Cores específicas por tipo */
+.stat-item-rawg.hours {
+  background: linear-gradient(145deg, var(--dark-4), #1e293b);
+}
+.stat-item-rawg.hours .stat-icon {
+  color: #60a5fa;
+}
+
+.stat-item-rawg.achievements {
+  background: linear-gradient(145deg, var(--dark-4), #312e81);
+}
+.stat-item-rawg.achievements .stat-icon {
+  color: #fbbf24;
+}
+
+.stat-item-rawg.rating {
+  background: linear-gradient(145deg, var(--dark-4), #831843);
+}
+.stat-item-rawg.rating .stat-icon {
+  color: #f472b6;
+}
+
+.stat-icon {
+  font-size: 18px;
+  min-width: 24px;
+  text-align: center;
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  font-size: 10px;
+  color: var(--gray-2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--light-1);
+  line-height: 1.3;
+}
+
+/* Versão minimalista (Versão 2) */
+.game-stats-rawg.minimal {
+  gap: 8px;
+  border-top: none;
+  padding-top: 0;
+}
+
+.stat-mini {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: var(--dark-4);
+  border-radius: 30px;
+  font-size: 12px;
+  color: var(--light-1);
+}
+
+.stat-mini .hours-icon { color: #60a5fa; }
+.stat-mini .trophy-icon { color: #fbbf24; }
+.stat-mini .star-icon { color: #f472b6; }
+
+.stat-mini span {
+  font-weight: 500;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .stat-item-rawg {
+    min-width: 70px;
+    padding: 6px 8px;
+  }
+  
+  .stat-icon {
+    font-size: 16px;
+    min-width: 20px;
+  }
+  
+  .stat-label {
+    font-size: 9px;
+  }
+  
+  .stat-value {
+    font-size: 12px;
+  }
 }

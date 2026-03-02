@@ -91,10 +91,20 @@ router.post('/add', auth, async (req, res) => {
 });
 
 // Listar coleção do usuário
+router.get('/collection/me', auth, async (req, res) => {
+    try {
+        const games = await Game.find({ userId: req.user.id }).sort({ addedAt: -1 });
+        res.json(games);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Erro ao buscar coleção' });
+    }
+});
+
+// Listar coleção de outro usuário (rota genérica)
 router.get('/collection/:userId', auth, async (req, res) => {
     try {
-        const userId = req.params.userId || req.user.id;
-        const games = await Game.find({ userId }).sort({ addedAt: -1 });
+        const games = await Game.find({ userId: req.params.userId }).sort({ addedAt: -1 });
         res.json(games);
     } catch (err) {
         console.error(err);
