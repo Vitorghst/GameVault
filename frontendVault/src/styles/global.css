@@ -2297,12 +2297,13 @@ body {
 
 .auth-gradient {
   position: absolute;
-  top: -50%;
-  right: -50%;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle, rgba(139, 92, 246, 0.2), transparent 70%);
+  background: radial-gradient(circle at 30% 50%, rgba(139, 92, 246, 0.2), transparent 70%);
   animation: pulse 4s ease-in-out infinite;
+  pointer-events: none; /* Garante que não atrapalhe cliques */
 }
 
 .auth-particles {
