@@ -1,5 +1,7 @@
 import React from "react";
-import { FaClock, FaTrophy, FaStar, FaHeart } from "react-icons/fa";
+import toast from 'react-hot-toast';
+import { showConfirm } from '../utils/confirmDialog';
+import { FaClock, FaTrophy, FaStar, FaHeart, FaTrash } from "react-icons/fa";
 import {
   FaWindows,
   FaPlaystation,
@@ -11,7 +13,7 @@ import {
 } from "react-icons/fa";
 import { SiNintendoswitch, SiMacos } from "react-icons/si";
 
-const GameCardRAWG = ({ game, onClick }) => {
+const GameCardRAWG = ({ game, onClick, onDelete }) => {
   const getStatusClass = (status) => {
     const statusMap = {
       jogando: "status-jogando",
@@ -23,17 +25,6 @@ const GameCardRAWG = ({ game, onClick }) => {
     return statusMap[status] || "";
   };
 
-  // const getStatusIcon = (status) => {
-  //   switch(status) {
-  //     case 'favorito': return '❤️';
-  //     case 'jogando': return '🎮';
-  //     case 'zerado': return '✅';
-  //     case 'abandonado': return '⏸️';
-  //     case 'quero jogar': return '⏳';
-  //     default: return '📦';
-  //   }
-  // };
-
   const formatHours = (hours) => {
     if (!hours) return "0h";
     return hours >= 24
@@ -41,11 +32,50 @@ const GameCardRAWG = ({ game, onClick }) => {
       : `${hours}h`;
   };
 
-  // Para jogos da busca (sem dados do usuário)
   const isSearchResult = !game._id;
+
+  const handleDeleteClick = (e) => {
+    e.stopPropagation();
+    
+    // 👇 USA A CONFIRMAÇÃO PERSONALIZADA
+    showConfirm(`Remover "${game.name}" da sua coleção?`, async () => {
+      try {
+        await onDelete(game._id);
+        toast.success('Jogo removido com sucesso!', {
+          className: 'toast-success',
+          duration: 3000,
+        });
+      } catch (error) {
+        toast.error('Erro ao remover jogo', {
+          className: 'toast-error',
+        });
+      }
+    });
+  };
+
+  const handleAddClick = (e) => {
+    e.stopPropagation();
+    toast.success('✨ Jogo adicionado à coleção!', {
+      className: 'toast-success',
+      duration: 3000,
+    });
+    // Aqui você chama a função de adicionar
+  };
 
   return (
     <div className="game-card-rawg" onClick={onClick}>
+      
+      {/* LIXEIRA NO CANTO SUPERIOR DIREITO (SÓ NA COLEÇÃO) */}
+      {!isSearchResult && (
+        <button 
+          className="card-delete-btn"
+          onClick={handleDeleteClick}
+          title="Remover da coleção"
+        >
+          <FaTrash />
+        </button>
+      )}
+
       <div className="game-card-image-container">
         <img
           src={
@@ -131,43 +161,26 @@ const GameCardRAWG = ({ game, onClick }) => {
             {game.platforms.slice(0, 4).map((platform) => {
               const getPlatformIcon = (id) => {
                 switch (id) {
-                  // PC
-                  case 6:
-                    return <FaWindows />;
-                  // PlayStation
+                  case 6: return <FaWindows />;
                   case 48:
                   case 167:
                   case 7:
                   case 8:
-                  case 9:
-                    return <FaPlaystation />;
-                  // Xbox
+                  case 9: return <FaPlaystation />;
                   case 49:
                   case 169:
                   case 12:
-                  case 11:
-                    return <FaXbox />;
-                  // Nintendo
+                  case 11: return <FaXbox />;
                   case 130:
                   case 4:
                   case 41:
-                  case 5:
-                    return <SiNintendoswitch />;
-                  // Apple / Mac
-                  case 14:
-                    return <SiMacos />;
-                  case 39:
-                    return <FaApple />;
-                  // Linux / Android
-                  case 3:
-                    return <FaLinux />;
-                  case 34:
-                    return <FaAndroid />;
-                  // Web
-                  case 82:
-                    return <FaGlobe />;
-                  default:
-                    return null;
+                  case 5: return <SiNintendoswitch />;
+                  case 14: return <SiMacos />;
+                  case 39: return <FaApple />;
+                  case 3: return <FaLinux />;
+                  case 34: return <FaAndroid />;
+                  case 82: return <FaGlobe />;
+                  default: return null;
                 }
               };
 
@@ -195,7 +208,10 @@ const GameCardRAWG = ({ game, onClick }) => {
         {isSearchResult &&
           game.first_release_date &&
           game.first_release_date * 1000 < Date.now() && (
-            <button className="suggested-user-follow-btn">
+            <button 
+              className="suggested-user-follow-btn"
+              onClick={handleAddClick}
+            >
               + Adicionar à coleção
             </button>
           )}

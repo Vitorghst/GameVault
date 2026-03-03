@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 const GameModal = ({ game, isOpen, onClose, onSave, onDelete }) => {
   const [formData, setFormData] = useState({
@@ -8,6 +8,20 @@ const GameModal = ({ game, isOpen, onClose, onSave, onDelete }) => {
     personalRating: game?.personalRating || 0,
     notes: game?.notes || "",
   });
+
+  useEffect(() => {
+  if (game) {
+    setFormData({
+      status: game.status || "quero jogar",
+      hoursPlayed: game.hoursPlayed || 0,
+      achievements: game.achievements || 0,
+      personalRating: game.personalRating || 0,
+      notes: game.notes || "",
+    });
+  }
+}, [game]);
+
+  console.log(game)
 
   if (!isOpen) return null;
 

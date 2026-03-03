@@ -349,6 +349,7 @@ const DashboardRAWG = () => {
                         ),
                       }}
                       onClick={() => handleSearchResultClick(game)}
+                      onDelete={handleDeleteGame} 
                     />
                   ))}
                 </div>
@@ -495,6 +496,7 @@ const DashboardRAWG = () => {
                     key={game._id}
                     game={game}
                     onClick={() => handleGameClick(game)}
+                    onDelete={handleDeleteGame} 
                   />
                 ))}
               </div>
