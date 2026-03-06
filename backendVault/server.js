@@ -21,7 +21,7 @@ const app = express();
 
 // Configuração do CORS
 app.use(cors({
-    origin: ['http://localhost:3001', 'https://gamevault-backend-kumn.onrender.com'],
+    origin: ['http://localhost:3001', 'https://game-vault-navy.vercel.app'],
     credentials: true
 }));
 
