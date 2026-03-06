@@ -45,11 +45,12 @@ const GoogleAuthHandler = () => {
     
     if (token) {
       if (window.opener) {
-        window.opener.postMessage({ type: 'GOOGLE_LOGIN_SUCCESS', token }, 'https://gamevault-backend-kumn.onrender.com');
+        // Envia para a origem da janela principal (frontend)
+        window.opener.postMessage({ type: 'GOOGLE_LOGIN_SUCCESS', token }, window.location.origin);
         window.close();
       } else {
+        // Fluxo normal (não é popup)
         localStorage.setItem('token', token);
-        
         fetch('https://gamevault-backend-kumn.onrender.com/api/auth/me', {
           headers: { 'x-auth-token': token }
         })
@@ -74,7 +75,8 @@ const MessageListener = () => {
 
   useEffect(() => {
     const handleMessage = (event) => {
-      if (event.origin !== 'https://gamevault-backend-kumn.onrender.com') return;
+      // Verifica se a origem é a mesma do frontend
+      if (event.origin !== window.location.origin) return;
       
       if (event.data.type === 'GOOGLE_LOGIN_SUCCESS') {
         const token = event.data.token;
