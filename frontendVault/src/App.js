@@ -45,12 +45,12 @@ const GoogleAuthHandler = () => {
     
     if (token) {
       if (window.opener) {
-        window.opener.postMessage({ type: 'GOOGLE_LOGIN_SUCCESS', token }, 'http://localhost:3001');
+        window.opener.postMessage({ type: 'GOOGLE_LOGIN_SUCCESS', token }, 'https://gamevault-backend-kumn.onrender.com');
         window.close();
       } else {
         localStorage.setItem('token', token);
         
-        fetch('http://localhost:3000/api/auth/me', {
+        fetch('https://gamevault-backend-kumn.onrender.com/api/auth/me', {
           headers: { 'x-auth-token': token }
         })
           .then(res => res.json())
@@ -74,14 +74,14 @@ const MessageListener = () => {
 
   useEffect(() => {
     const handleMessage = (event) => {
-      if (event.origin !== 'http://localhost:3001') return;
+      if (event.origin !== 'https://gamevault-backend-kumn.onrender.com') return;
       
       if (event.data.type === 'GOOGLE_LOGIN_SUCCESS') {
         const token = event.data.token;
         
         localStorage.setItem('token', token);
         
-        fetch('http://localhost:3000/api/auth/me', {
+        fetch('https://gamevault-backend-kumn.onrender.com/api/auth/me', {
           headers: { 'x-auth-token': token }
         })
           .then(res => res.json())
