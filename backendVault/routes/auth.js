@@ -105,7 +105,7 @@ router.get('/google/callback',
         
         console.log('🔐 Token gerado com sucesso');
         
-        const frontendURL = 'https://gamevault-backend-kumn.onrender.com/api/auth/google/callback';
+        const frontendURL = 'https://gamevault-test.vercel.app';
         res.redirect(`${frontendURL}/dashboard?token=${token}`);
     }
 );

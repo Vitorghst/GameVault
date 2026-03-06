@@ -21,7 +21,7 @@ const app = express();
 
 // Configuração do CORS
 app.use(cors({
-    origin: ['http://localhost:3001', 'https://game-vault-navy.vercel.app'],
+    origin: ['http://localhost:3001', 'https://gamevault-test.vercel.app'],
     credentials: true
 }));
 
