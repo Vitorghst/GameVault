@@ -4,26 +4,30 @@ const userSchema = new mongoose.Schema({
     username: {
         type: String,
         required: true,
-        unique: true,
         trim: true
     },
     email: {
         type: String,
         required: true,
-        unique: true,
         lowercase: true
     },
     password: {
         type: String,
-        required: true
+        default: null
     },
-    avatar: {
+    googleId: {
         type: String,
-        default: 'default-avatar.png'
+        unique: true,
+        sparse: true
     },
+    githubId: {
+        type: String,
+        unique: true,
+        sparse: true
+    },
+    avatar: String,
     bio: {
         type: String,
-        maxLength: 500,
         default: ''
     },
     createdAt: {

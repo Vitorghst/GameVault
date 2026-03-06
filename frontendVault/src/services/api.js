@@ -1,15 +1,13 @@
 import axios from 'axios';
 
-// 👇 URL dinâmica: local em desenvolvimento, Render em produção
 const baseURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:3000/api'
-  : 'https://gamevault-backend-kumn.onrender.com/api'; // Depois de fazer o deploy, troque aqui!
+  : 'https://gamevault-backend-kumn.onrender.com/api';
 
 const api = axios.create({
   baseURL,
 });
 
-// Interceptor para adicionar token
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -18,7 +16,6 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Interceptor para tratar erros
 api.interceptors.response.use(
   (response) => response,
   (error) => {

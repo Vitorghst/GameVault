@@ -3,22 +3,46 @@ const dns = require('dns');
 dns.setServers(['8.8.8.8', '8.8.4.4']);
 console.log('📡 DNS configurado:', dns.getServers());
 
+// 👇 DOTENV DEVE VIR IMEDIATAMENTE APÓS O DNS
+const dotenv = require('dotenv');
+dotenv.config();
+
 // Depois os requires normais
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const dotenv = require('dotenv');
+const session = require('express-session');
+const passport = require('./config/passport');
 const authRoutes = require('./routes/auth');
 const gameRoutes = require('./routes/games');
 const userRoutes = require('./routes/users');
 
-dotenv.config();
-
 const app = express();
 
-app.use(cors());
+// Configuração do CORS
+app.use(cors({
+    origin: ['http://localhost:3001', 'https://game-vault-navy.vercel.app'],
+    credentials: true
+}));
+
 app.use(express.json());
 
+// Configuração da sessão
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'segredo_temporario',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { 
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 24 * 60 * 60 * 1000
+    }
+}));
+
+// Inicializar Passport
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Rotas
 app.use('/api/auth', authRoutes);
 app.use('/api/games', gameRoutes);
 app.use('/api/users', userRoutes);

@@ -686,13 +686,6 @@ body {
   color: white;
 }
 
-.game-card-content {
-  padding: 20px;
-  background: var(--card-bg);
-  position: relative;
-  z-index: 2;
-}
-
 .game-card-title {
   font-size: 16px;
   font-weight: 600;
@@ -2088,7 +2081,45 @@ body {
   font-weight: 500;
 }
 
-.suggested-user-follow-btn {
+
+.game-card-content {
+  padding: 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+
+}
+
+/* Título com altura mínima fixa */
+.game-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--light-1);
+  margin-bottom: 8px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 44px; /* 👈 GARANTE ESPAÇO PARA 2 LINHAS */
+}
+
+/* Meta informações */
+.game-meta {
+  margin-bottom: 8px;
+}
+
+/* Plataformas */
+.game-platforms {
+  margin: 8px 0;
+}
+
+/* Stats */
+.game-stats-rawg.minimal {
+  margin: 8px 0;
+}
+
+.suggested-user-follow-btn-clean {
   padding: 10px 20px;
   background: linear-gradient(135deg, var(--primary), var(--secondary));
   border: none;
@@ -2100,13 +2131,35 @@ body {
   transition: all 0.3s;
   white-space: nowrap;
   box-shadow: var(--shadow-md);
+  margin-top: auto; /* 👈 ESSA É A MAGIA - EMPURRA PARA O FINAL */
+}
+
+.suggested-user-follow-btn-clean:hover {
+  transform: scale(1.05);
+  box-shadow: var(--shadow-glow);
+}
+
+/* BOTÃO DE ADICIONAR - FIXO NO FINAL! */
+.suggested-user-follow-btn {
+  width: 100%;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  border: none;
+  border-radius: 30px;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  white-space: nowrap;
+  box-shadow: var(--shadow-md);
+  margin-top: auto; /* 👈 ESSA É A MAGIA - EMPURRA PARA O FINAL */
 }
 
 .suggested-user-follow-btn:hover {
   transform: scale(1.05);
   box-shadow: var(--shadow-glow);
 }
-
 /* Search Categories */
 .search-categories {
   margin-top: 60px;
@@ -3071,11 +3124,29 @@ body {
   color: var(--danger);
 }
 
-/* Conteúdo principal com margem */
 .main-content-with-sidebar {
   margin-left: 280px;
   min-height: 100vh;
-  background: var(--dark-1);
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.03) 0%, transparent 50%);
+
+  position: relative;
+}
+
+/* .main-content-with-sidebar::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.03) 0%, transparent 50%);
+  animation: pulse 10s ease-in-out infinite;
+  pointer-events: none;
+} */
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.1); }
 }
 
 /* Scrollbar personalizada para a sidebar */
@@ -3126,11 +3197,6 @@ body {
     aspect-ratio: auto;
   }
 
-  .game-card-content {
-    flex: 1;
-    padding: 12px;
-  }
-
   .game-card-title {
     font-size: 14px;
     margin-bottom: 4px;
@@ -3167,14 +3233,13 @@ body {
 
 /* ========== MOBILE MENU ========== */
 
-/* Botão do menu hambúrguer */
 .mobile-menu-toggle {
-  position: fixed;
+  position: sticky;  /* 👈 MUDA DE FIXED PARA STICKY */
   top: 16px;
-  right: 16px;  /* 👈 AGORA NA DIREITA! */
-  left: auto;   /* 👈 GARANTE QUE NÃO FIQUE NOS DOIS LADOS */
+  right: 16px;
+  float: right; 
   z-index: 1002;
-  background: linear-gradient(135deg, #8b5cf6, #ec4899);
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
   border: none;
   border-radius: 50%;
   width: 48px;
@@ -3187,8 +3252,10 @@ body {
   cursor: pointer;
   box-shadow: 0 10px 25px -5px rgba(139, 92, 246, 0.5);
   transition: all 0.3s ease;
+  margin-left: auto;  /* 👈 EMPURRA PRA DIREITA */
 }
 
+/* Quando o menu está aberto, talvez queira mudar a cor */
 .mobile-menu-toggle:hover {
   transform: scale(1.1);
   box-shadow: 0 20px 30px -10px rgba(139, 92, 246, 0.7);
@@ -3234,12 +3301,6 @@ body {
     left: 0;
   }
 
-  /* Ajuste no conteúdo principal */
-  .main-content-with-sidebar {
-    margin-left: 0 !important;
-    padding: 20px;
-    padding-top: 80px !important;
-  }
 
   /* Ajustes nos elementos da sidebar */
   .vertical-navbar-logo {
@@ -3537,11 +3598,7 @@ a:active,
     flex-direction: column;
     height: auto; /* Altura determinada pelo conteúdo */
   }
-  
-  .game-card-content {
-    padding: 12px;
-  }
-  
+
   .game-card-title {
     font-size: 14px;
     margin-bottom: 8px;
@@ -3993,4 +4050,141 @@ a:active,
     opacity: 0;
     transform: translateY(20px);
   }
+}
+
+.avatar-image {
+  width: 49px;
+  object-fit: cover;
+  border-radius: 35%;
+}
+
+/* Estilos desktop (padrão) – mantém como antes */
+.hero-search-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 700px;
+  margin: 0 auto 30px;
+  background: var(--card-bg);
+  border-radius: 60px;
+  padding: 4px 4px 4px 24px;
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-lg);
+}
+
+.hero-search-box .search-icon {
+  color: var(--gray-2);
+  font-size: 20px;
+  transition: color 0.3s;
+  /* desktop: estático */
+  position: static;
+  margin-right: 0;
+}
+
+.hero-search-box input {
+  flex: 1;
+  padding: 18px 0;
+  border: none;
+  background: transparent;
+  color: var(--light-1);
+  font-size: 16px;
+}
+
+.hero-search-box .clear-search-btn {
+  background: transparent;
+  border: none;
+  color: var(--gray-2);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  position: static;
+  width: auto;
+  height: auto;
+}
+
+.hero-search-box > button:last-child {
+  padding: 14px 36px;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: white;
+  border: none;
+  border-radius: 60px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.4s;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .hero-search-box {
+    position: relative; 
+    flex-direction: column;
+    align-items: stretch;
+    background: transparent;
+    border: none;
+    padding: 0;
+    gap: 8px;
+  }
+
+  /* A lupa fica dentro do input */
+  .hero-search-box .search-icon {
+    position: absolute;
+    left: 16px;
+    top: 22%;
+    transform: translateY(-50%);
+    z-index: 2;
+    font-size: 18px;
+    color: var(--gray-2);
+    /* remove margin/padding que possam atrapalhar */
+    margin: 0;
+    padding: 0;
+  }
+
+  /* O input ocupa toda largura e tem padding para a lupa */
+  .hero-search-box input {
+    width: 100%;
+    padding: 14px 45px 14px 45px;
+    background: var(--card-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 30px;
+    font-size: 14px;
+    box-sizing: border-box;
+  }
+
+  /* Botão de limpar (X) também dentro do input */
+  .hero-search-box .clear-search-btn {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    background: transparent;
+    border: none;
+    color: var(--gray-2);
+    font-size: 18px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    padding: 0;
+  }
+
+  /* Botão "Buscar" fica abaixo */
+  .hero-search-box > button:last-child {
+    width: 100%;
+    padding: 12px;
+    margin-top: 4px;
+    font-size: 14px;
+  }
+}
+
+.avatar-large-image {
+  width: 100%;
+  border-radius: 30px;
+  object-fit: cover;
+  display: block;
 }

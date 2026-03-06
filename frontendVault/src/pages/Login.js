@@ -14,16 +14,29 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    
+
     const result = await login(email, password);
-    
+
     if (result.success) {
       navigate('/dashboard');
     } else {
       alert(result.error);
     }
-    
+
     setLoading(false);
+  };
+
+  const handleGoogleLogin = () => {
+    const width = 600;
+    const height = 700;
+    const left = window.screen.width / 2 - width / 2;
+    const top = window.screen.height / 2 - height / 2;
+    
+    window.open(
+      'http://localhost:3000/api/auth/google',
+      'Google Login',
+      `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
+    );
   };
 
   return (
@@ -111,9 +124,9 @@ const Login = () => {
             </Link>
           </div>
 
-          <button 
-            type="submit" 
-            className="auth-submit-btn" 
+          <button
+            type="submit"
+            className="auth-submit-btn"
             disabled={loading}
           >
             {loading ? (
@@ -134,7 +147,10 @@ const Login = () => {
 
         {/* Social Login */}
         <div className="social-login">
-          <button className="social-btn google">
+          <button 
+            onClick={handleGoogleLogin} 
+            className="social-btn google"
+          >
             <FaGoogle /> Google
           </button>
           <button className="social-btn github">

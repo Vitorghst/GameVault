@@ -1,21 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import Navbar from '../components/Navbar';
-import GameCardRAWG from '../components/GameCardRAWG';
-import GameModal from '../components/GameModal';
-import api from '../services/api';
-import { useAuth } from '../contexts/AuthContext';
-import { 
-  FaGamepad, 
-  FaHeart, 
-  FaClock, 
-  FaTrophy, 
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import Navbar from "../components/Navbar";
+import GameCardRAWG from "../components/GameCardRAWG";
+import GameModal from "../components/GameModal";
+import api from "../services/api";
+import { useAuth } from "../contexts/AuthContext";
+import {
+  FaGamepad,
+  FaHeart,
+  FaClock,
+  FaTrophy,
   FaStar,
   FaUserFriends,
   FaCalendarAlt,
   FaEdit,
-  FaCog
-} from 'react-icons/fa';
+  FaCog,
+} from "react-icons/fa";
 
 const Profile = () => {
   const { username } = useParams();
@@ -24,14 +24,14 @@ const Profile = () => {
   const [collection, setCollection] = useState([]);
   const [selectedGame, setSelectedGame] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('colecao');
+  const [activeTab, setActiveTab] = useState("colecao");
   const [stats, setStats] = useState({
     total: 0,
     jogando: 0,
     zerados: 0,
     favoritos: 0,
     totalHoras: 0,
-    totalConquistas: 0
+    totalConquistas: 0,
   });
 
   const isOwnProfile = !username || username === currentUser?.username;
@@ -47,31 +47,42 @@ const Profile = () => {
         setProfile(userRes.data);
       }
 
-      const endpoint = username && username !== currentUser?.username 
-        ? `/games/collection/${username}` 
-        : '/games/collection/me';
-      
+      const endpoint =
+        username && username !== currentUser?.username
+          ? `/games/collection/${username}`
+          : "/games/collection/me";
+
       const collectionRes = await api.get(endpoint);
       setCollection(collectionRes.data);
 
-      const newStats = collectionRes.data.reduce((acc, game) => {
-        acc.total++;
-        if (game.status === 'jogando') acc.jogando++;
-        if (game.status === 'zerado') acc.zerados++;
-        if (game.status === 'favorito') acc.favoritos++;
-        acc.totalHoras += game.hoursPlayed || 0;
-        acc.totalConquistas += game.achievements || 0;
-        return acc;
-      }, { total: 0, jogando: 0, zerados: 0, favoritos: 0, totalHoras: 0, totalConquistas: 0 });
+      const newStats = collectionRes.data.reduce(
+        (acc, game) => {
+          acc.total++;
+          if (game.status === "jogando") acc.jogando++;
+          if (game.status === "zerado") acc.zerados++;
+          if (game.status === "favorito") acc.favoritos++;
+          acc.totalHoras += game.hoursPlayed || 0;
+          acc.totalConquistas += game.achievements || 0;
+          return acc;
+        },
+        {
+          total: 0,
+          jogando: 0,
+          zerados: 0,
+          favoritos: 0,
+          totalHoras: 0,
+          totalConquistas: 0,
+        },
+      );
 
       setStats(newStats);
     } catch (error) {
-      console.error('Erro ao carregar perfil:', error);
+      console.error("Erro ao carregar perfil:", error);
     }
   };
 
   const formatHours = (hours) => {
-    if (!hours) return '0h';
+    if (!hours) return "0h";
     const days = Math.floor(hours / 24);
     const remainingHours = hours % 24;
     return days > 0 ? `${days}d ${remainingHours}h` : `${hours}h`;
@@ -79,44 +90,73 @@ const Profile = () => {
 
   // Dados de exemplo para atividade recente
   const recentActivity = [
-    { id: 1, action: 'Zerou', game: 'The Witcher 3', date: '2 dias atrás' },
-    { id: 2, action: 'Começou a jogar', game: 'Elden Ring', date: '5 dias atrás' },
-    { id: 3, action: 'Favoritou', game: 'Red Dead Redemption 2', date: '1 semana atrás' },
+    { id: 1, action: "Zerou", game: "The Witcher 3", date: "2 dias atrás" },
+    {
+      id: 2,
+      action: "Começou a jogar",
+      game: "Elden Ring",
+      date: "5 dias atrás",
+    },
+    {
+      id: 3,
+      action: "Favoritou",
+      game: "Red Dead Redemption 2",
+      date: "1 semana atrás",
+    },
   ];
 
   // Amigos de exemplo
   const friends = [
-    { id: 1, name: 'João', avatar: 'J', game: 'Jogando God of War' },
-    { id: 2, name: 'Maria', avatar: 'M', game: 'Zerou Cyberpunk' },
-    { id: 3, name: 'Pedro', avatar: 'P', game: 'Jogando Zelda' },
+    { id: 1, name: "João", avatar: "J", game: "Jogando God of War" },
+    { id: 2, name: "Maria", avatar: "M", game: "Zerou Cyberpunk" },
+    { id: 3, name: "Pedro", avatar: "P", game: "Jogando Zelda" },
   ];
 
   return (
     <>
-      
       {/* Hero do Perfil */}
       <div className="profile-hero">
         <div className="profile-hero-content">
           <div className="profile-avatar-container">
             <div className="profile-avatar-large">
-              {profile?.username?.[0]?.toUpperCase() || currentUser?.username?.[0]?.toUpperCase()}
+              {profile?.avatar ? (
+                <img
+                  src={profile.avatar}
+                  alt={profile.username}
+                  className="avatar-large-image"
+                />
+              ) : currentUser?.avatar ? (
+                <img
+                  src={currentUser.avatar}
+                  alt={currentUser.username}
+                  className="avatar-large-image"
+                />
+              ) : (
+                profile?.username?.[0]?.toUpperCase() ||
+                currentUser?.username?.[0]?.toUpperCase() ||
+                "U"
+              )}
             </div>
             {isOwnProfile && (
               <button className="profile-edit-btn">
-                <span className='edit-icon'><FaEdit /></span>
+                <span className="edit-icon">
+                  <FaEdit />
+                </span>
               </button>
             )}
           </div>
-          
+
           <div className="profile-info">
             <h1 className="profile-name">
               {profile?.username || currentUser?.username}
-              {isOwnProfile && <span className="profile-badge" style={{marginLeft: '8px'}}>⚡ Você</span>}
+              {isOwnProfile && (
+                <span className="profile-badge" style={{ marginLeft: "8px" }}>
+                  ⚡ Você
+                </span>
+              )}
             </h1>
-            <p className="profile-bio">
-              {profile?.bio || 'Sem bio definida'}
-            </p>
-            
+            <p className="profile-bio">{profile?.bio || "Sem bio definida"}</p>
+
             <div className="profile-meta">
               <div className="profile-meta-item">
                 <FaCalendarAlt className="meta-icon" />
@@ -134,7 +174,10 @@ const Profile = () => {
       {/* Stats Cards */}
       <div className="profile-stats-grid">
         <div className="profile-stat-card">
-          <div className="profile-stat-icon" style={{ background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)' }}>
+          <div
+            className="profile-stat-icon"
+            style={{ background: "linear-gradient(135deg, #8b5cf6, #7c3aed)" }}
+          >
             <FaGamepad />
           </div>
           <div className="profile-stat-info">
@@ -144,7 +187,10 @@ const Profile = () => {
         </div>
 
         <div className="profile-stat-card">
-          <div className="profile-stat-icon" style={{ background: 'linear-gradient(135deg, #ec4899, #f43f5e)' }}>
+          <div
+            className="profile-stat-icon"
+            style={{ background: "linear-gradient(135deg, #ec4899, #f43f5e)" }}
+          >
             <FaHeart />
           </div>
           <div className="profile-stat-info">
@@ -154,17 +200,25 @@ const Profile = () => {
         </div>
 
         <div className="profile-stat-card">
-          <div className="profile-stat-icon" style={{ background: 'linear-gradient(135deg, #06b6d4, #0891b2)' }}>
+          <div
+            className="profile-stat-icon"
+            style={{ background: "linear-gradient(135deg, #06b6d4, #0891b2)" }}
+          >
             <FaClock />
           </div>
           <div className="profile-stat-info">
-            <span className="profile-stat-value">{formatHours(stats.totalHoras)}</span>
+            <span className="profile-stat-value">
+              {formatHours(stats.totalHoras)}
+            </span>
             <span className="profile-stat-label">Horas jogadas</span>
           </div>
         </div>
 
         <div className="profile-stat-card">
-          <div className="profile-stat-icon" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>
+          <div
+            className="profile-stat-icon"
+            style={{ background: "linear-gradient(135deg, #f59e0b, #d97706)" }}
+          >
             <FaTrophy />
           </div>
           <div className="profile-stat-info">
@@ -174,7 +228,10 @@ const Profile = () => {
         </div>
 
         <div className="profile-stat-card">
-          <div className="profile-stat-icon" style={{ background: 'linear-gradient(135deg, #10b981, #059669)' }}>
+          <div
+            className="profile-stat-icon"
+            style={{ background: "linear-gradient(135deg, #10b981, #059669)" }}
+          >
             <FaStar />
           </div>
           <div className="profile-stat-info">
@@ -184,7 +241,10 @@ const Profile = () => {
         </div>
 
         <div className="profile-stat-card">
-          <div className="profile-stat-icon" style={{ background: 'linear-gradient(135deg, #6366f1, #4f46e5)' }}>
+          <div
+            className="profile-stat-icon"
+            style={{ background: "linear-gradient(135deg, #6366f1, #4f46e5)" }}
+          >
             <FaGamepad />
           </div>
           <div className="profile-stat-info">
@@ -196,21 +256,21 @@ const Profile = () => {
 
       {/* Tabs */}
       <div className="profile-tabs">
-        <button 
-          className={`profile-tab ${activeTab === 'colecao' ? 'active' : ''}`}
-          onClick={() => setActiveTab('colecao')}
+        <button
+          className={`profile-tab ${activeTab === "colecao" ? "active" : ""}`}
+          onClick={() => setActiveTab("colecao")}
         >
           📚 Coleção ({collection.length})
         </button>
-        <button 
-          className={`profile-tab ${activeTab === 'atividade' ? 'active' : ''}`}
-          onClick={() => setActiveTab('atividade')}
+        <button
+          className={`profile-tab ${activeTab === "atividade" ? "active" : ""}`}
+          onClick={() => setActiveTab("atividade")}
         >
           📊 Atividade Recente
         </button>
-        <button 
-          className={`profile-tab ${activeTab === 'amigos' ? 'active' : ''}`}
-          onClick={() => setActiveTab('amigos')}
+        <button
+          className={`profile-tab ${activeTab === "amigos" ? "active" : ""}`}
+          onClick={() => setActiveTab("amigos")}
         >
           👥 Amigos (128)
         </button>
@@ -226,26 +286,34 @@ const Profile = () => {
 
       <div className="main-content-rawg">
         {/* Aba de Coleção */}
-        {activeTab === 'colecao' && (
+        {activeTab === "colecao" && (
           <div className="colecao-section">
             <div className="section-header">
               <h2>
                 <FaGamepad className="section-title-icon" />
-                {isOwnProfile ? 'Minha Coleção' : `Coleção de ${profile?.username || currentUser?.username}`}
+                {isOwnProfile
+                  ? "Minha Coleção"
+                  : `Coleção de ${profile?.username || currentUser?.username}`}
               </h2>
             </div>
 
             {collection.length === 0 ? (
               <div className="empty-collection">
-                <img src="https://cdn-icons-png.flaticon.com/512/4076/4076478.png" alt="Empty" />
+                <img
+                  src="https://cdn-icons-png.flaticon.com/512/4076/4076478.png"
+                  alt="Empty"
+                />
                 <h3>Coleção vazia</h3>
                 <p>
-                  {isOwnProfile 
-                    ? 'Comece adicionando jogos à sua coleção!' 
-                    : 'Este usuário ainda não tem jogos na coleção.'}
+                  {isOwnProfile
+                    ? "Comece adicionando jogos à sua coleção!"
+                    : "Este usuário ainda não tem jogos na coleção."}
                 </p>
                 {isOwnProfile && (
-                  <button className="explorar-btn" onClick={() => window.location.href = '/dashboard'}>
+                  <button
+                    className="explorar-btn"
+                    onClick={() => (window.location.href = "/dashboard")}
+                  >
                     Explorar Jogos
                   </button>
                 )}
@@ -268,7 +336,7 @@ const Profile = () => {
         )}
 
         {/* Aba de Atividade Recente */}
-        {activeTab === 'atividade' && (
+        {activeTab === "atividade" && (
           <div className="atividade-section">
             <div className="section-header">
               <h2>
@@ -281,9 +349,9 @@ const Profile = () => {
               {recentActivity.map((activity) => (
                 <div key={activity.id} className="activity-item">
                   <div className="activity-icon">
-                    {activity.action === 'Zerou' && '✅'}
-                    {activity.action === 'Começou a jogar' && '🎮'}
-                    {activity.action === 'Favoritou' && '❤️'}
+                    {activity.action === "Zerou" && "✅"}
+                    {activity.action === "Começou a jogar" && "🎮"}
+                    {activity.action === "Favoritou" && "❤️"}
                   </div>
                   <div className="activity-content">
                     <p>
@@ -298,7 +366,7 @@ const Profile = () => {
         )}
 
         {/* Aba de Amigos */}
-        {activeTab === 'amigos' && (
+        {activeTab === "amigos" && (
           <div className="amigos-section">
             <div className="section-header">
               <h2>
@@ -323,7 +391,7 @@ const Profile = () => {
         )}
 
         {/* Aba de Configurações (só para o próprio perfil) */}
-        {activeTab === 'config' && isOwnProfile && (
+        {activeTab === "config" && isOwnProfile && (
           <div className="config-section">
             <div className="section-header">
               <h2>
@@ -335,8 +403,8 @@ const Profile = () => {
             <div className="config-form">
               <div className="form-group">
                 <label>Nome de usuário</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   className="form-input"
                   defaultValue={currentUser?.username}
                 />
@@ -344,8 +412,8 @@ const Profile = () => {
 
               <div className="form-group">
                 <label>Email</label>
-                <input 
-                  type="email" 
+                <input
+                  type="email"
                   className="form-input"
                   defaultValue={currentUser?.email}
                 />
@@ -353,7 +421,7 @@ const Profile = () => {
 
               <div className="form-group">
                 <label>Bio</label>
-                <textarea 
+                <textarea
                   className="form-textarea"
                   placeholder="Conte um pouco sobre você..."
                   defaultValue={profile?.bio}
@@ -366,15 +434,11 @@ const Profile = () => {
                   <div className="avatar-preview">
                     {currentUser?.username?.[0]?.toUpperCase()}
                   </div>
-                  <button className="avatar-upload-btn">
-                    Alterar Avatar
-                  </button>
+                  <button className="avatar-upload-btn">Alterar Avatar</button>
                 </div>
               </div>
 
-              <button className="save-profile-btn">
-                Salvar Alterações
-              </button>
+              <button className="save-profile-btn">Salvar Alterações</button>
             </div>
           </div>
         )}
@@ -391,8 +455,8 @@ const Profile = () => {
               setModalOpen(false);
               loadProfile();
             } catch (error) {
-              console.error('Erro ao atualizar jogo:', error);
-              alert('Erro ao atualizar jogo');
+              console.error("Erro ao atualizar jogo:", error);
+              alert("Erro ao atualizar jogo");
             }
           }}
           onDelete={async (gameId) => {
@@ -401,8 +465,8 @@ const Profile = () => {
               setModalOpen(false);
               loadProfile();
             } catch (error) {
-              console.error('Erro ao deletar jogo:', error);
-              alert('Erro ao remover jogo');
+              console.error("Erro ao deletar jogo:", error);
+              alert("Erro ao remover jogo");
             }
           }}
         />

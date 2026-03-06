@@ -133,7 +133,7 @@ const DashboardRAWG = () => {
       game.first_release_date &&
       game.first_release_date * 1000 > Date.now()
     ) {
-      return; 
+      return;
     }
     setSelectedGame({
       igdbId: game.id,
@@ -212,30 +212,28 @@ const DashboardRAWG = () => {
           </p>
 
           <div className="hero-search-box">
-            <FaSearch className="search-icon" />
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                // Quando apagar tudo, volta para os populares
-                if (!e.target.value.trim()) {
-                  setActiveTab("explorar");
-                 
-                }
-              }}
-              onKeyPress={(e) => e.key === "Enter" && searchGames()}
-              placeholder="Buscar jogos por nome, gênero, plataforma..."
-            />
-            {searchTerm && (
-              <button
-                className="clear-search-btn"
-                onClick={clearSearch}
-                type="button"
-              >
-                <FaTimes />
-              </button>
-            )}
+              <FaSearch className="search-icon" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  if (!e.target.value.trim()) {
+                    setActiveTab("explorar");
+                  }
+                }}
+                onKeyPress={(e) => e.key === "Enter" && searchGames()}
+                placeholder="Buscar jogos por nome, gênero, plataforma..."
+              />
+              {searchTerm && (
+                <button
+                  className="clear-search-btn"
+                  onClick={clearSearch}
+                  type="button"
+                >
+                  <FaTimes />
+                </button>
+              )}
             <button
               onClick={searchGames}
               disabled={loading || !searchTerm.trim()}
@@ -331,7 +329,7 @@ const DashboardRAWG = () => {
                     </span>
                   </div>
                   <button
-                    className="suggested-user-follow-btn"
+                    className="suggested-user-follow-btn-clean"
                     onClick={clearSearch}
                   >
                     <FaTimes /> Limpar busca
@@ -349,7 +347,7 @@ const DashboardRAWG = () => {
                         ),
                       }}
                       onClick={() => handleSearchResultClick(game)}
-                      onDelete={handleDeleteGame} 
+                      onDelete={handleDeleteGame}
                     />
                   ))}
                 </div>
@@ -496,7 +494,7 @@ const DashboardRAWG = () => {
                     key={game._id}
                     game={game}
                     onClick={() => handleGameClick(game)}
-                    onDelete={handleDeleteGame} 
+                    onDelete={handleDeleteGame}
                   />
                 ))}
               </div>
