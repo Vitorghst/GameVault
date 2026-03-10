@@ -40,7 +40,7 @@ const Login = () => {
     const top = window.screen.height / 2 - height / 2;
     
     window.open(
-      'http://localhost:3000/api/auth/google',
+      'https://gamevault-backend-kumn.onrender.com/api/auth/google',
       'Google Login',
       `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
     );

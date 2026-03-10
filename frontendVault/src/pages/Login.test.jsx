@@ -139,7 +139,7 @@ describe('Login Component', () => {
     fireEvent.click(googleButton)
 
     expect(openSpy).toHaveBeenCalledWith(
-      expect.stringContaining('localhost:3000/api/auth/google'),
+      expect.stringContaining('https://gamevault-backend-kumn.onrender.com/api/auth/google'),
       'Google Login',
       expect.stringContaining('width=600')
     )

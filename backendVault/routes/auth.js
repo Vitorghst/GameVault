@@ -118,7 +118,7 @@ router.get('/google/callback',
         
         console.log('🔐 Token gerado com sucesso');
         
-        const frontendURL = 'http://localhost:3001';
+        const frontendURL = 'game-vault-navy.vercel.app';
         res.redirect(`${frontendURL}/dashboard?token=${token}`);
     }
 );

@@ -51,7 +51,7 @@ const GoogleAuthHandler = () => {
       } else {
         // Fluxo normal (não é popup)
         localStorage.setItem('token', token);
-        fetch('http://localhost:3000/api/auth/me', {
+        fetch('https://gamevault-backend-kumn.onrender.com/api/auth/me', {
           headers: { 'x-auth-token': token }
         })
           .then(res => res.json())
@@ -83,7 +83,7 @@ const MessageListener = () => {
         
         localStorage.setItem('token', token);
         
-        fetch('http://localhost:3000/api/auth/me', {
+        fetch('https://gamevault-backend-kumn.onrender.com/api/auth/me', {
           headers: { 'x-auth-token': token }
         })
           .then(res => res.json())
