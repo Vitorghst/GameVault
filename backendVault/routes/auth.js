@@ -3,80 +3,93 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const passport = require('passport');
 const User = require('../models/User');
+const CryptoJS = require('crypto-js');
 
 const router = express.Router();
 
 // ========== REGISTRO ==========
+
 router.post('/register', async (req, res) => {
-    try {
-        const { username, email, password } = req.body;
+  try {
+    const { username, email, password } = req.body;
 
-        let user = await User.findOne({ $or: [{ email }, { username }] });
-        if (user) {
-            return res.status(400).json({ message: 'Usuário ou email já existe' });
-        }
+    // 🔓 Descriptografa
+    const bytes = CryptoJS.AES.decrypt(password, process.env.CRYPTO_SECRET_KEY);
+    const decryptedPassword = bytes.toString(CryptoJS.enc.Utf8);
 
-        user = new User({
-            username,
-            email,
-            password: await bcrypt.hash(password, 10)
-        });
-
-        await user.save();
-
-        const token = jwt.sign(
-            { id: user._id, username: user.username },
-            process.env.JWT_SECRET,
-            { expiresIn: '7d' }
-        );
-
-        res.status(201).json({
-            token,
-            user: {
-                id: user._id,
-                username: user.username,
-                email: user.email
-            }
-        });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Erro no servidor' });
+    let user = await User.findOne({ $or: [{ email }, { username }] });
+    if (user) {
+      return res.status(400).json({ message: 'Usuário ou email já existe' });
     }
+
+    const hashedPassword = await bcrypt.hash(decryptedPassword, 10);
+
+    user = new User({
+      username,
+      email,
+      password: hashedPassword,
+    });
+
+    await user.save();
+
+    const token = jwt.sign(
+      { id: user._id, username: user.username },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.status(201).json({
+      token,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Erro no servidor' });
+  }
 });
 
 // ========== LOGIN ==========
 router.post('/login', async (req, res) => {
-    try {
-        const { email, password } = req.body;
+  try {
+    const { email, password } = req.body; // password é o texto cifrado
 
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(400).json({ message: 'Credenciais inválidas' });
-        }
+    // 🔓 Descriptografa a senha
+    const bytes = CryptoJS.AES.decrypt(password, process.env.CRYPTO_SECRET_KEY);
+    const decryptedPassword = bytes.toString(CryptoJS.enc.Utf8);
 
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.status(400).json({ message: 'Credenciais inválidas' });
-        }
-
-        const token = jwt.sign(
-            { id: user._id, username: user.username },
-            process.env.JWT_SECRET,
-            { expiresIn: '7d' }
-        );
-
-        res.json({
-            token,
-            user: {
-                id: user._id,
-                username: user.username,
-                email: user.email
-            }
-        });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Erro no servidor' });
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: 'Credenciais inválidas' });
     }
+
+    // Compara com o bcrypt usando a senha descriptografada
+    const isMatch = await bcrypt.compare(decryptedPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Credenciais inválidas' });
+    }
+
+    const token = jwt.sign(
+      { id: user._id, username: user.username },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.json({
+      token,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email
+      }
+    });
+  } catch (err) {
+    console.error('❌ Erro no login:', err);
+    res.status(500).json({ message: 'Erro no servidor' });
+  }
 });
 
 // ========== GOOGLE ==========
@@ -105,7 +118,7 @@ router.get('/google/callback',
         
         console.log('🔐 Token gerado com sucesso');
         
-        const frontendURL = 'https://gamevault-test.vercel.app';
+        const frontendURL = 'http://localhost:3001';
         res.redirect(`${frontendURL}/dashboard?token=${token}`);
     }
 );
