@@ -153,7 +153,8 @@ router.get('/google/callback',
         
         console.log('🔐 Token gerado com sucesso');
         
-        const frontendURL = 'https://gamevault-test.vercel.app';
+        const frontendURL =
+            process.env.FRONTEND_URL || 'https://gamevault-test.vercel.app';
         res.redirect(`${frontendURL}/dashboard?token=${token}`);
     }
 );

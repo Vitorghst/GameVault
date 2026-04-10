@@ -12,6 +12,12 @@ import Profile from './pages/Profile';
 import SearchUsers from './pages/SearchUsers';
 import './styles/global.css';
 
+const API_BASE_URL =
+  process.env.REACT_APP_API_URL ||
+  (process.env.NODE_ENV === 'development'
+    ? 'http://localhost:3001/api'
+    : 'https://gamevault-backend-kumn.onrender.com/api');
+
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useAuth();
   
@@ -45,7 +51,7 @@ const GoogleAuthHandler = () => {
     const loadAuthenticatedUser = async (token) => {
       try {
         localStorage.setItem('token', token);
-        const response = await fetch('https://gamevault-backend-kumn.onrender.com/api/auth/me', {
+        const response = await fetch(`${API_BASE_URL}/auth/me`, {
           headers: { 'x-auth-token': token }
         });
 
@@ -101,7 +107,7 @@ const MessageListener = () => {
     const loadAuthenticatedUser = async (token) => {
       try {
         localStorage.setItem('token', token);
-        const response = await fetch('https://gamevault-backend-kumn.onrender.com/api/auth/me', {
+        const response = await fetch(`${API_BASE_URL}/auth/me`, {
           headers: { 'x-auth-token': token }
         });
 

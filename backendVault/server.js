@@ -18,10 +18,14 @@ const gameRoutes = require('./routes/games');
 const userRoutes = require('./routes/users');
 
 const app = express();
+const allowedOrigins = [
+  'http://localhost:3001',
+  process.env.FRONTEND_URL || 'https://gamevault-test.vercel.app',
+].filter(Boolean);
 
 // Configuração do CORS
 app.use(cors({
-    origin: ['http://localhost:3001', 'https://gamevault-test.vercel.app'],
+    origin: allowedOrigins,
     credentials: true
 }));
 
@@ -58,7 +62,7 @@ mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
     console.log('✅ Conectado ao MongoDB');
     app.listen(PORT, () => {
-      console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
+      console.log(`🚀 Servidor rodando na porta ${PORT}`);
     });
   })
   .catch(err => {

@@ -4,6 +4,12 @@ import { useAuth } from '../contexts/AuthContext';
 import { FaEnvelope, FaLock, FaGoogle, FaGithub } from 'react-icons/fa';
 import GameVaultLogo from '../components/GameVaultLogo';
 
+const API_BASE_URL =
+  process.env.REACT_APP_API_URL ||
+  (process.env.NODE_ENV === 'development'
+    ? 'http://localhost:3001/api'
+    : 'https://gamevault-backend-kumn.onrender.com/api');
+
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -33,7 +39,7 @@ const Login = () => {
     const top = window.screen.height / 2 - height / 2;
     
     window.open(
-      'https://gamevault-backend-kumn.onrender.com/api/auth/google',
+      `${API_BASE_URL}/auth/google`,
       'Google Login',
       `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
     );
