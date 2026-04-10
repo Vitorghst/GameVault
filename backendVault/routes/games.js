@@ -1,6 +1,7 @@
 const express = require("express");
 const axios = require("axios");
 const Game = require("../models/Game");
+const User = require("../models/User");
 const auth = require("../middleware/auth");
 
 const router = express.Router();
@@ -9,6 +10,30 @@ const router = express.Router();
 const IGDB_API = "https://api.igdb.com/v4";
 let accessToken = null;
 let tokenExpiry = null;
+
+async function findYouTubeTrailer(gameName) {
+  if (!process.env.YOUTUBE_API_KEY || !gameName) {
+    return null;
+  }
+
+  try {
+    const response = await axios.get("https://www.googleapis.com/youtube/v3/search", {
+      params: {
+        key: process.env.YOUTUBE_API_KEY,
+        part: "snippet",
+        q: `${gameName} official game trailer`,
+        type: "video",
+        maxResults: 1,
+        videoEmbeddable: "true",
+      },
+    });
+
+    return response.data?.items?.[0]?.id?.videoId || null;
+  } catch (err) {
+    console.error("Erro ao buscar trailer no YouTube:", err.message);
+    return null;
+  }
+}
 
 // Função para obter token da IGDB
 async function getIGDBAccessToken() {
@@ -65,6 +90,74 @@ router.post("/search", auth, async (req, res) => {
   }
 });
 
+router.get("/details/:igdbId", auth, async (req, res) => {
+  try {
+    const token = await getIGDBAccessToken();
+    const igdbId = Number(req.params.igdbId);
+
+    if (!igdbId) {
+      return res.status(400).json({ message: "ID do jogo inválido" });
+    }
+
+    const response = await axios.post(
+      `${IGDB_API}/games`,
+      `
+        fields
+          name,
+          summary,
+          storyline,
+          cover.url,
+          first_release_date,
+          genres.name,
+          platforms.name,
+          platforms.id,
+          involved_companies.company.name,
+          aggregated_rating,
+          aggregated_rating_count,
+          rating,
+          rating_count,
+          total_rating,
+          total_rating_count,
+          screenshots.url,
+          videos.video_id,
+          artworks.url;
+        where id = ${igdbId};
+        limit 1;
+      `,
+      {
+        headers: {
+          "Client-ID": process.env.IGDB_CLIENT_ID,
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      },
+    );
+
+    const game = response.data?.[0];
+
+    if (!game) {
+      return res.status(404).json({ message: "Jogo não encontrado" });
+    }
+
+    const collectionGame = await Game.findOne({
+      userId: req.user.id,
+      igdbId,
+    });
+
+    const youtubeTrailerId =
+      game.videos?.[0]?.video_id || (await findYouTubeTrailer(game.name));
+
+    res.json({
+      ...game,
+      collectionGame,
+      youtubeTrailerId,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Erro ao buscar detalhes do jogo" });
+  }
+});
+
 // Adicionar jogo à coleção
 router.post("/add", auth, async (req, res) => {
   try {
@@ -115,6 +208,25 @@ router.get("/collection/me", auth, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Erro ao buscar coleção" });
+  }
+});
+
+router.get("/collection/:username", auth, async (req, res) => {
+  try {
+    const user = await User.findOne({ username: req.params.username }).select("_id");
+
+    if (!user) {
+      return res.status(404).json({ message: "Usuário não encontrado" });
+    }
+
+    const games = await Game.find({ userId: user._id }).sort({
+      addedAt: -1,
+    });
+
+    res.json(games);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Erro ao buscar coleção do usuário" });
   }
 });
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import Navbar from "../components/Navbar";
+import { useNavigate } from "react-router-dom";
 import GameCardRAWG from "../components/GameCardRAWG";
 import GameModal from "../components/GameModal";
 import api from "../services/api";
@@ -7,39 +7,27 @@ import {
   FaSearch,
   FaFire,
   FaStar,
-  FaClock,
-  FaTrophy,
   FaGamepad,
   FaHeart,
-  FaHourglassHalf,
-  FaFilter,
   FaTimes,
 } from "react-icons/fa";
-import { BsFillCollectionFill } from "react-icons/bs";
-import { RiVerifiedBadgeFill } from "react-icons/ri";
-import { IoLogoGameControllerB } from "react-icons/io";
 import { FaMagnifyingGlass } from "react-icons/fa6";
 
 const DashboardRAWG = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [searchSuggestions, setSearchSuggestions] = useState([]);
   const [collection, setCollection] = useState([]);
-  const [filteredCollection, setFilteredCollection] = useState([]);
   const [selectedGame, setSelectedGame] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [activeFilter, setActiveFilter] = useState("todos");
-  const [activeTab, setActiveTab] = useState("colecao");
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [popularGames, setPopularGames] = useState([]);
-  const [recentGames, setRecentGames] = useState([]);
   const [mostAnticipated, setMostAnticipated] = useState([]);
   const [stats, setStats] = useState({
     total: 0,
-    jogando: 0,
-    zerados: 0,
     favoritos: 0,
-    totalHoras: 0,
-    totalConquistas: 0,
   });
 
   useEffect(() => {
@@ -48,29 +36,45 @@ const DashboardRAWG = () => {
     loadMostAnticipated();
   }, []);
 
+  useEffect(() => {
+    const query = searchTerm.trim();
+
+    if (query.length < 2) {
+      setSearchSuggestions([]);
+      setLoadingSuggestions(false);
+      return;
+    }
+
+    const timeoutId = setTimeout(async () => {
+      try {
+        setLoadingSuggestions(true);
+        const response = await api.post("/games/search", { search: query });
+        setSearchSuggestions(response.data.slice(0, 6));
+      } catch (error) {
+        console.error("Erro ao buscar sugestões:", error);
+        setSearchSuggestions([]);
+      } finally {
+        setLoadingSuggestions(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm]);
+
   const loadCollection = async () => {
     try {
       const response = await api.get("/games/collection/me");
       setCollection(response.data);
-      setFilteredCollection(response.data);
 
       const newStats = response.data.reduce(
         (acc, game) => {
           acc.total++;
-          if (game.status === "jogando") acc.jogando++;
-          if (game.status === "zerado") acc.zerados++;
           if (game.status === "favorito") acc.favoritos++;
-          acc.totalHoras += game.hoursPlayed || 0;
-          acc.totalConquistas += game.achievements || 0;
           return acc;
         },
         {
           total: 0,
-          jogando: 0,
-          zerados: 0,
           favoritos: 0,
-          totalHoras: 0,
-          totalConquistas: 0,
         },
       );
 
@@ -84,7 +88,6 @@ const DashboardRAWG = () => {
     try {
       const response = await api.post("/games/search", { search: "popular" });
       setPopularGames(response.data.slice(0, 6));
-      setRecentGames(response.data.slice(6, 12));
     } catch (error) {
       console.error("Erro ao carregar jogos populares:", error);
     }
@@ -106,10 +109,10 @@ const DashboardRAWG = () => {
     if (!searchTerm.trim()) return;
 
     setLoading(true);
-    setActiveTab("explorar");
     try {
       const response = await api.post("/games/search", { search: searchTerm });
       setSearchResults(response.data);
+      setSearchSuggestions([]);
     } catch (error) {
       console.error("Erro na busca:", error);
       alert("Erro ao buscar jogos");
@@ -121,11 +124,19 @@ const DashboardRAWG = () => {
   const clearSearch = () => {
     setSearchTerm("");
     setSearchResults([]);
+    setSearchSuggestions([]);
   };
 
-  const handleGameClick = (game) => {
-    setSelectedGame(game);
-    setModalOpen(true);
+  const handleSuggestionClick = async (game) => {
+    setSearchSuggestions([]);
+    navigate(`/jogo/${game.id}`, {
+      state: {
+        game: {
+          ...game,
+          cover: game.cover?.url?.replace("t_thumb", "t_cover_big") || null,
+        },
+      },
+    });
   };
 
   const handleSearchResultClick = async (game) => {
@@ -188,22 +199,21 @@ const DashboardRAWG = () => {
     }
   };
 
-  const filterCollection = (filter) => {
-    setActiveFilter(filter);
-    if (filter === "todos") {
-      setFilteredCollection(collection);
-    } else {
-      setFilteredCollection(
-        collection.filter((game) => game.status === filter),
-      );
-    }
-  };
+  const hasSearchContext = Boolean(searchTerm.trim() || searchResults.length);
 
   return (
     <>
       {/* Hero Search Section */}
       <div className="hero-search">
         <div className="hero-content">
+          <div className="hero-eyebrow">
+            <span className="hero-eyebrow-pill">Biblioteca viva</span>
+            <span className="hero-eyebrow-text">
+              {collection.length > 0
+                ? `${collection.length} jogos organizados no seu cofre`
+                : "Seu espaço para descobrir, salvar e acompanhar games"}
+            </span>
+          </div>
           <h1 className="hero-title">
             Descubra <span className="gradient-text">jogos incríveis</span>
           </h1>
@@ -211,15 +221,17 @@ const DashboardRAWG = () => {
             Mais de 400.000 jogos para explorar e adicionar à sua coleção
           </p>
 
-          <div className="hero-search-box">
+          <div className="hero-search-shell">
+            <div className="hero-search-box">
               <FaSearch className="search-icon" />
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => {
-                  setSearchTerm(e.target.value);
-                  if (!e.target.value.trim()) {
-                    setActiveTab("explorar");
+                  const nextValue = e.target.value;
+                  setSearchTerm(nextValue);
+                  if (!nextValue.trim()) {
+                    setSearchResults([]);
                   }
                 }}
                 onKeyPress={(e) => e.key === "Enter" && searchGames()}
@@ -240,6 +252,61 @@ const DashboardRAWG = () => {
             >
               Buscar
             </button>
+            </div>
+            {(loadingSuggestions || searchSuggestions.length > 0) && (
+              <div className="search-suggestions">
+                {loadingSuggestions ? (
+                  <div className="search-suggestion-item muted">
+                    Buscando sugestões...
+                  </div>
+                ) : (
+                  searchSuggestions.map((game) => (
+                    <button
+                      key={game.id}
+                      type="button"
+                      className="search-suggestion-item"
+                      onClick={() => handleSuggestionClick(game)}
+                    >
+                      <div className="search-suggestion-thumb">
+                        <img
+                          src={
+                            game.cover?.url?.replace("t_thumb", "t_cover_small") ||
+                            "https://via.placeholder.com/80x100?text=No+Image"
+                          }
+                          alt={game.name}
+                          onError={(e) => {
+                            e.target.src = "https://via.placeholder.com/80x100?text=No+Image";
+                          }}
+                        />
+                      </div>
+                      <div className="search-suggestion-content">
+                        <span className="search-suggestion-title">{game.name}</span>
+                        <span className="search-suggestion-meta">
+                          {game.first_release_date
+                            ? new Date(game.first_release_date * 1000).getFullYear()
+                            : "Sem data"}
+                          {game.genres?.[0]?.name ? ` • ${game.genres[0].name}` : ""}
+                        </span>
+                      </div>
+                    </button>
+                  ))
+                )}
+              </div>
+            )}
+            <div className="hero-search-meta">
+              <div className="hero-meta-pill">
+                <FaGamepad />
+                <span>Exploração curada por coleção</span>
+              </div>
+              <div className="hero-meta-pill">
+                <FaStar />
+                <span>{mostAnticipated.length || 25} destaques em alta</span>
+              </div>
+              <div className="hero-meta-pill">
+                <FaHeart />
+                <span>{stats.favoritos} favoritos no radar</span>
+              </div>
+            </div>
           </div>
 
           <div className="search-trends">
@@ -259,248 +326,156 @@ const DashboardRAWG = () => {
         </div>
       </div>
 
-      {/* Stats Bar */}
-      <div className="stats-bar">
-        <div className="stat-block">
-          <FaGamepad className="stat-block-icon" />
+      <div className="dashboard-overview">
+        <div className="dashboard-overview-header">
           <div>
-            <span className="stat-block-value">{stats.total}</span>
-            <span className="stat-block-label">Jogos na coleção</span>
+            <p className="dashboard-kicker">Resumo da sua jornada</p>
+            <h2 className="dashboard-overview-title">
+              Seu hub principal está pronto para mais uma rodada
+            </h2>
           </div>
-        </div>
-        <div className="stat-block">
-          <FaHeart className="stat-block-icon" style={{ color: "#ff4d4d" }} />
-          <div>
-            <span className="stat-block-value">{stats.favoritos}</span>
-            <span className="stat-block-label">Favoritos</span>
-          </div>
-        </div>
-        <div className="stat-block">
-          <FaClock className="stat-block-icon" />
-          <div>
-            <span className="stat-block-value">
-              {Math.floor(stats.totalHoras / 24)}d
+          <div className="dashboard-overview-badge">
+            <FaFire />
+            <span>
+              {hasSearchContext ? "Busca ativa" : "Modo exploração"}
             </span>
-            <span className="stat-block-label">Total jogado</span>
           </div>
         </div>
-        <div className="stat-block">
-          <FaTrophy className="stat-block-icon" style={{ color: "#ffd700" }} />
-          <div>
-            <span className="stat-block-value">{stats.totalConquistas}</span>
-            <span className="stat-block-label">Conquistas</span>
-          </div>
-        </div>
-      </div>
 
-      {/* Tabs */}
-      <div className="dashboard-tabs">
-        <button
-          className={`tab-btn ${activeTab === "colecao" ? "active" : ""}`}
-          onClick={() => setActiveTab("colecao")}
-        >
-          <BsFillCollectionFill /> Minha Coleção ({collection.length})
-        </button>
-        <button
-          className={`tab-btn ${activeTab === "explorar" ? "active" : ""}`}
-          onClick={() => {
-            setActiveTab("explorar");
-            setSearchResults([]);
-          }}
-        >
-          <span className="logo-explorar">
-            <FaMagnifyingGlass />
-          </span>{" "}
-          Explorar {searchTerm && `"${searchTerm}"`}
-        </button>
+        {/* Stats Bar */}
+        <div className="stats-bar">
+          <div className="stat-block">
+            <div className="stat-block-icon-wrap">
+              <FaGamepad className="stat-block-icon" />
+            </div>
+            <div>
+              <span className="stat-block-value">{stats.total}</span>
+              <span className="stat-block-label">Jogos no cofre</span>
+            </div>
+          </div>
+          <div className="stat-block">
+            <div className="stat-block-icon-wrap danger">
+              <FaHeart className="stat-block-icon" style={{ color: "#ff4d4d" }} />
+            </div>
+            <div>
+              <span className="stat-block-value">{stats.favoritos}</span>
+              <span className="stat-block-label">Favoritos</span>
+            </div>
+          </div>
+          <div className="stat-block">
+            <div className="stat-block-icon-wrap accent">
+              <FaMagnifyingGlass className="stat-block-icon" />
+            </div>
+            <div>
+              <span className="stat-block-value">{popularGames.length}</span>
+              <span className="stat-block-label">Sugestoes em destaque</span>
+            </div>
+          </div>
+          <div className="stat-block">
+            <div className="stat-block-icon-wrap warning">
+              <FaStar className="stat-block-icon" style={{ color: "#ffd700" }} />
+            </div>
+            <div>
+              <span className="stat-block-value">{mostAnticipated.length}</span>
+              <span className="stat-block-label">Mais aguardados</span>
+            </div>
+          </div>
+        </div>
+
+        {hasSearchContext && (
+          <div className="dashboard-tabs">
+            <button className="tab-btn active" onClick={clearSearch}>
+              <span className="logo-explorar">
+                <FaMagnifyingGlass />
+              </span>{" "}
+              Explorar {searchTerm && `"${searchTerm}"`}
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="main-content-rawg">
-        {/* Explorar / Resultados de Busca */}
-        {activeTab === "explorar" && (
-          <div className="explorar-section">
-            {searchResults.length > 0 ? (
-              <>
-                <div className="section-header">
-                  <div>
-                    <h2>Resultados para "{searchTerm}"</h2>
-                    <span className="results-count">
-                      {searchResults.length} jogos encontrados
-                    </span>
-                  </div>
-                  <button
-                    className="suggested-user-follow-btn-clean"
-                    onClick={clearSearch}
-                  >
-                    <FaTimes /> Limpar busca
-                  </button>
+        <div className="explorar-section">
+          {searchResults.length > 0 ? (
+            <>
+              <div className="section-header">
+                <div>
+                  <h2>Resultados para "{searchTerm}"</h2>
+                  <span className="results-count">
+                    {searchResults.length} jogos encontrados
+                  </span>
                 </div>
-                <div className="games-grid-rawg">
-                  {searchResults.map((game) => (
-                    <GameCardRAWG
-                      key={game.id}
-                      game={{
-                        ...game,
-                        cover: game.cover?.url?.replace(
-                          "t_thumb",
-                          "t_cover_big",
-                        ),
-                      }}
-                      onClick={() => handleSearchResultClick(game)}
-                      onDelete={handleDeleteGame}
-                    />
-                  ))}
-                </div>
-              </>
-            ) : (
-              <div className="explorar-default">
-                {/* Seção de populares */}
-                <div className="section-header">
-                  <h2>
-                    <FaFire style={{ color: "#ff6b6b" }} /> Mais Aguardados
-                  </h2>
-                </div>
-                <div className="games-grid-rawg">
-                  {mostAnticipated.map(
-                    (
-                      game, // 👈 MUDEI DE popularGames PARA recentGames
-                    ) => (
-                      <GameCardRAWG
-                        key={game.id}
-                        game={{
-                          ...game,
-                          cover: game.cover?.url?.replace(
-                            "t_thumb",
-                            "t_cover_big",
-                          ),
-                        }}
-                        onClick={() => handleSearchResultClick(game)}
-                      />
-                    ),
-                  )}
-                </div>
-
-                {/* Seção de lançamentos */}
-                {/* <div className="section-header" style={{ marginTop: "48px" }}>
-                  <h2>
-                    <FaStar style={{ color: "#ffd700" }} /> Novos Lançamentos
-                  </h2>
-                  <span className="section-subtitle">Últimos 30 dias</span>
-                </div>
-                <div className="games-grid-rawg">
-                  {recentGames.map((game) => (
-                    <GameCardRAWG
-                      key={game.id}
-                      game={{
-                        ...game,
-                        cover: game.cover?.url?.replace(
-                          "t_thumb",
-                          "t_cover_big",
-                        ),
-                      }}
-                      onClick={() => handleSearchResultClick(game)}
-                    />
-                  ))}
-                </div> */}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Minha Coleção */}
-        {activeTab === "colecao" && (
-          <div className="colecao-section">
-            <div className="section-header">
-              <h2>
-                {" "}
-                <span className="logo-collection">
-                  <BsFillCollectionFill />
-                </span>{" "}
-                Minha Coleção
-              </h2>
-              <div className="filters-rawg">
-                <FaFilter className="filter-icon" />
                 <button
-                  className={`filter-chip ${activeFilter === "todos" ? "active" : ""}`}
-                  onClick={() => filterCollection("todos")}
+                  className="suggested-user-follow-btn-clean"
+                  onClick={clearSearch}
                 >
-                  Todos ({collection.length})
-                </button>
-                <button
-                  className={`filter-chip ${activeFilter === "jogando" ? "active" : ""}`}
-                  onClick={() => filterCollection("jogando")}
-                >
-                  <span className="logo-jogando">
-                    <IoLogoGameControllerB />
-                  </span>{" "}
-                  Jogando (
-                  {collection.filter((g) => g.status === "jogando").length})
-                </button>
-                <button
-                  className={`filter-chip ${activeFilter === "zerado" ? "active" : ""}`}
-                  onClick={() => filterCollection("zerado")}
-                >
-                  <span className="logo-finalizado">
-                    <RiVerifiedBadgeFill />
-                  </span>{" "}
-                  Zerados (
-                  {collection.filter((g) => g.status === "zerado").length})
-                </button>
-                <button
-                  className={`filter-chip ${activeFilter === "favorito" ? "active" : ""}`}
-                  onClick={() => filterCollection("favorito")}
-                >
-                  <span className="logo-favoritos">
-                    <FaHeart />
-                  </span>{" "}
-                  Favoritos (
-                  {collection.filter((g) => g.status === "favorito").length})
-                </button>
-                <button
-                  className={`filter-chip ${activeFilter === "quero jogar" ? "active" : ""}`}
-                  onClick={() => filterCollection("quero jogar")}
-                >
-                  <span className="logo-quero">
-                    <FaHourglassHalf />
-                  </span>{" "}
-                  Quero Jogar (
-                  {collection.filter((g) => g.status === "quero jogar").length})
+                  <FaTimes /> Limpar busca
                 </button>
               </div>
-            </div>
-
-            {filteredCollection.length === 0 ? (
-              <div className="empty-collection">
-                <img
-                  src="https://cdn-icons-png.flaticon.com/512/4076/4076478.png"
-                  alt="Empty"
-                />
-                <h3>Sua coleção está vazia</h3>
-                <p>
-                  Busque jogos na aba Explorar e comece a construir sua
-                  biblioteca!
-                </p>
-                <button
-                  className="explorar-btn"
-                  onClick={() => setActiveTab("explorar")}
-                >
-                  Explorar Jogos
-                </button>
-              </div>
-            ) : (
               <div className="games-grid-rawg">
-                {filteredCollection.map((game) => (
+                {searchResults.map((game) => (
                   <GameCardRAWG
-                    key={game._id}
-                    game={game}
-                    onClick={() => handleGameClick(game)}
+                    key={game.id}
+                    game={{
+                      ...game,
+                      cover: game.cover?.url?.replace("t_thumb", "t_cover_big"),
+                    }}
+                    onClick={() => handleSearchResultClick(game)}
                     onDelete={handleDeleteGame}
                   />
                 ))}
               </div>
-            )}
+            </>
+          ) : (
+            <div className="explorar-default">
+              <div className="section-header">
+                <div>
+                  <h2>
+                    <FaStar style={{ color: "#ffd700" }} /> Descobertas para voce
+                  </h2>
+                  <span className="section-subtitle">
+                    Uma selecao pra começar sua proxima busca
+                  </span>
+                </div>
+              </div>
+              <div className="games-grid-rawg">
+                {popularGames.map((game) => (
+                  <GameCardRAWG
+                    key={game.id}
+                    game={{
+                      ...game,
+                      cover: game.cover?.url?.replace("t_thumb", "t_cover_big"),
+                    }}
+                    onClick={() => handleSearchResultClick(game)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="explorar-section section-stack">
+          <div className="section-header">
+            <h2>
+              <FaFire style={{ color: "#ff6b6b" }} /> Mais Aguardados
+            </h2>
+            <span className="section-subtitle">
+              Jogos com mais expectativa da comunidade
+            </span>
           </div>
-        )}
+          <div className="games-grid-rawg">
+            {mostAnticipated.map((game) => (
+              <GameCardRAWG
+                key={game.id}
+                game={{
+                  ...game,
+                  cover: game.cover?.url?.replace("t_thumb", "t_cover_big"),
+                }}
+                onClick={() => handleSearchResultClick(game)}
+              />
+            ))}
+          </div>
+        </div>
       </div>
 
       <GameModal

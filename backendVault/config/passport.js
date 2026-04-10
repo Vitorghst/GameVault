@@ -2,6 +2,19 @@ const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('../models/User');
 
+async function generateUniqueUsername(baseUsername) {
+    const normalizedBase = (baseUsername || 'usuario').trim().replace(/\s+/g, '_');
+    let candidate = normalizedBase;
+    let counter = 1;
+
+    while (await User.exists({ username: candidate })) {
+        candidate = `${normalizedBase}_${counter}`;
+        counter += 1;
+    }
+
+    return candidate;
+}
+
 // Serialização do usuário
 passport.serializeUser((user, done) => {
     done(null, user.id);
@@ -24,17 +37,27 @@ passport.use(new GoogleStrategy({
     callbackURL: process.env.GOOGLE_CALLBACK_URL
 }, async (accessToken, refreshToken, profile, done) => {
     try {
-        // Procura usuário pelo googleId
-        let user = await User.findOne({ googleId: profile.id });
+        const email = profile.emails?.[0]?.value?.toLowerCase();
+        let user = await User.findOne({
+            $or: [
+                { googleId: profile.id },
+                { email }
+            ]
+        });
         
         if (!user) {
-            // Se não existe, cria um novo
+            const username = await generateUniqueUsername(profile.displayName);
+
             user = await User.create({
-                username: profile.displayName,
-                email: profile.emails[0].value,
+                username,
+                email,
                 googleId: profile.id,
                 avatar: profile.photos[0]?.value
             });
+        } else {
+            user.googleId = user.googleId || profile.id;
+            user.avatar = user.avatar || profile.photos[0]?.value;
+            await user.save();
         }
         
         return done(null, user);

@@ -4,29 +4,54 @@ const jwt = require('jsonwebtoken');
 const passport = require('passport');
 const User = require('../models/User');
 const CryptoJS = require('crypto-js');
+const auth = require('../middleware/auth');
 
 const router = express.Router();
+
+function resolvePassword(passwordInput) {
+  if (typeof passwordInput !== 'string' || !passwordInput.trim()) {
+    return '';
+  }
+
+  if (process.env.CRYPTO_SECRET_KEY) {
+    try {
+      const bytes = CryptoJS.AES.decrypt(passwordInput, process.env.CRYPTO_SECRET_KEY);
+      const decryptedPassword = bytes.toString(CryptoJS.enc.Utf8);
+
+      if (decryptedPassword) {
+        return decryptedPassword;
+      }
+    } catch (err) {
+      console.error('Erro ao descriptografar senha:', err.message);
+    }
+  }
+
+  return passwordInput;
+}
 
 // ========== REGISTRO ==========
 
 router.post('/register', async (req, res) => {
   try {
     const { username, email, password } = req.body;
+    const normalizedEmail = email?.trim().toLowerCase();
+    const normalizedUsername = username?.trim();
+    const resolvedPassword = resolvePassword(password);
 
-    // 🔓 Descriptografa
-    const bytes = CryptoJS.AES.decrypt(password, process.env.CRYPTO_SECRET_KEY);
-    const decryptedPassword = bytes.toString(CryptoJS.enc.Utf8);
+    if (!normalizedUsername || !normalizedEmail || !resolvedPassword) {
+      return res.status(400).json({ message: 'Username, email e senha são obrigatórios' });
+    }
 
-    let user = await User.findOne({ $or: [{ email }, { username }] });
+    let user = await User.findOne({ $or: [{ email: normalizedEmail }, { username: normalizedUsername }] });
     if (user) {
       return res.status(400).json({ message: 'Usuário ou email já existe' });
     }
 
-    const hashedPassword = await bcrypt.hash(decryptedPassword, 10);
+    const hashedPassword = await bcrypt.hash(resolvedPassword, 10);
 
     user = new User({
-      username,
-      email,
+      username: normalizedUsername,
+      email: normalizedEmail,
       password: hashedPassword,
     });
 
@@ -48,6 +73,11 @@ router.post('/register', async (req, res) => {
     });
   } catch (err) {
     console.error(err);
+
+    if (err.code === 11000) {
+      return res.status(400).json({ message: 'Usuário ou email já existe' });
+    }
+
     res.status(500).json({ message: 'Erro no servidor' });
   }
 });
@@ -55,19 +85,24 @@ router.post('/register', async (req, res) => {
 // ========== LOGIN ==========
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body; // password é o texto cifrado
+    const { email, password } = req.body;
+    const normalizedEmail = email?.trim().toLowerCase();
+    const resolvedPassword = resolvePassword(password);
 
-    // 🔓 Descriptografa a senha
-    const bytes = CryptoJS.AES.decrypt(password, process.env.CRYPTO_SECRET_KEY);
-    const decryptedPassword = bytes.toString(CryptoJS.enc.Utf8);
+    if (!normalizedEmail || !resolvedPassword) {
+      return res.status(400).json({ message: 'Email e senha são obrigatórios' });
+    }
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: normalizedEmail });
     if (!user) {
       return res.status(400).json({ message: 'Credenciais inválidas' });
     }
 
-    // Compara com o bcrypt usando a senha descriptografada
-    const isMatch = await bcrypt.compare(decryptedPassword, user.password);
+    if (!user.password) {
+      return res.status(400).json({ message: 'Use o login social para acessar esta conta' });
+    }
+
+    const isMatch = await bcrypt.compare(resolvedPassword, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: 'Credenciais inválidas' });
     }
@@ -124,15 +159,9 @@ router.get('/google/callback',
 );
 
 // ========== ME ==========
-router.get('/me', async (req, res) => {
+router.get('/me', auth, async (req, res) => {
     try {
-        const token = req.header('x-auth-token');
-        if (!token) {
-            return res.status(401).json({ message: 'Token não fornecido' });
-        }
-
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const user = await User.findById(decoded.id).select('-password');
+        const user = await User.findById(req.user.id).select('-password');
         
         if (!user) {
             return res.status(404).json({ message: 'Usuário não encontrado' });

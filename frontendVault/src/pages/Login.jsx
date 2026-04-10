@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { FaEnvelope, FaLock, FaGamepad, FaGoogle, FaGithub } from 'react-icons/fa';
-import CryptoJS from 'crypto-js';
+import { FaEnvelope, FaLock, FaGoogle, FaGithub } from 'react-icons/fa';
+import GameVaultLogo from '../components/GameVaultLogo';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -12,17 +12,10 @@ const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const SECRET_KEY = process.env.REACT_APP_CRYPTO_SECRET_KEY;
-
   const handleSubmit = async (e) => {
   e.preventDefault();
   setLoading(true);
-
-  // 🔐 Criptografa a senha
-  const encryptedPassword = CryptoJS.AES.encrypt(password, SECRET_KEY).toString();
-
-  // Envia a senha criptografada
-  const result = await login(email, encryptedPassword);
+  const result = await login(email, password);
 
   if (result.success) {
     navigate('/dashboard');
@@ -64,8 +57,7 @@ const Login = () => {
       <div className="auth-card">
         {/* Logo */}
         <div className="auth-logo">
-          <FaGamepad className="auth-logo-icon" />
-          <span className="auth-logo-text">GameVault</span>
+          <GameVaultLogo />
         </div>
 
         {/* Header */}

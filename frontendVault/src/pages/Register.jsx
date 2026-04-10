@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { FaUser, FaEnvelope, FaLock, FaGamepad, FaGoogle, FaGithub } from 'react-icons/fa';
-import CryptoJS from 'crypto-js';
+import { FaUser, FaEnvelope, FaLock, FaGoogle, FaGithub } from 'react-icons/fa';
+import GameVaultLogo from '../components/GameVaultLogo';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -24,8 +24,6 @@ const Register = () => {
     });
   };
 
-  const SECRET_KEY = process.env.REACT_APP_CRYPTO_SECRET_KEY;
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -35,13 +33,11 @@ const Register = () => {
     }
     
     setLoading(true);
-
-     const encryptedPassword = CryptoJS.AES.encrypt(formData.password, SECRET_KEY).toString();
     
     const result = await register(
       formData.username,
       formData.email,
-      encryptedPassword
+      formData.password
     );
     
     if (result.success) {
@@ -69,8 +65,7 @@ const Register = () => {
       <div className="auth-card">
         {/* Logo */}
         <div className="auth-logo">
-          <FaGamepad className="auth-logo-icon" />
-          <span className="auth-logo-text">GameVault</span>
+          <GameVaultLogo />
         </div>
 
         {/* Header */}

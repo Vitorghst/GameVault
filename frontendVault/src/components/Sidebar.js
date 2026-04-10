@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import GameVaultLogo from './GameVaultLogo';
 import { 
   FaHome, 
   FaBook, 
@@ -40,7 +41,7 @@ const Sidebar = () => {
       {/* Logo */}
       <div className="sidebar-logo">
         <Link to="/dashboard">
-          <span className="logo-gradient">🎮 GameCollection</span>
+          <GameVaultLogo compact />
         </Link>
       </div>
 

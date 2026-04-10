@@ -6,6 +6,8 @@ import Navbar from './components/Navbar';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import DashboardRAWG from './pages/DashboardRAWG';
+import Collection from './pages/Collection';
+import GameDetails from './pages/GameDetails';
 import Profile from './pages/Profile';
 import SearchUsers from './pages/SearchUsers';
 import './styles/global.css';
@@ -40,6 +42,35 @@ const GoogleAuthHandler = () => {
   const { setUser } = useAuth();
 
   useEffect(() => {
+    const loadAuthenticatedUser = async (token) => {
+      try {
+        localStorage.setItem('token', token);
+        const response = await fetch('https://gamevault-backend-kumn.onrender.com/api/auth/me', {
+          headers: { 'x-auth-token': token }
+        });
+
+        if (!response.ok) {
+          throw new Error(`Falha ao carregar usuário autenticado (${response.status})`);
+        }
+
+        const userData = await response.json();
+
+        if (!userData?.id && !userData?._id) {
+          throw new Error('Resposta inválida ao carregar usuário autenticado');
+        }
+
+        localStorage.setItem('user', JSON.stringify(userData));
+        setUser(userData);
+        return true;
+      } catch (err) {
+        console.error('Erro ao buscar usuário:', err);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setUser(null);
+        return false;
+      }
+    };
+
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
     
@@ -49,19 +80,12 @@ const GoogleAuthHandler = () => {
         window.opener.postMessage({ type: 'GOOGLE_LOGIN_SUCCESS', token }, window.location.origin);
         window.close();
       } else {
-        // Fluxo normal (não é popup)
-        localStorage.setItem('token', token);
-        fetch('https://gamevault-backend-kumn.onrender.com/api/auth/me', {
-          headers: { 'x-auth-token': token }
-        })
-          .then(res => res.json())
-          .then(userData => {
-            localStorage.setItem('user', JSON.stringify(userData));
-            setUser(userData);
+        loadAuthenticatedUser(token).then((success) => {
+          if (success) {
             window.history.replaceState({}, document.title, window.location.pathname);
             navigate('/dashboard');
-          })
-          .catch(err => console.error('Erro ao buscar usuário:', err));
+          }
+        });
       }
     }
   }, [navigate, setUser]);
@@ -74,25 +98,41 @@ const MessageListener = () => {
   const { setUser } = useAuth();
 
   useEffect(() => {
+    const loadAuthenticatedUser = async (token) => {
+      try {
+        localStorage.setItem('token', token);
+        const response = await fetch('https://gamevault-backend-kumn.onrender.com/api/auth/me', {
+          headers: { 'x-auth-token': token }
+        });
+
+        if (!response.ok) {
+          throw new Error(`Falha ao carregar usuário autenticado (${response.status})`);
+        }
+
+        const userData = await response.json();
+
+        if (!userData?.id && !userData?._id) {
+          throw new Error('Resposta inválida ao carregar usuário autenticado');
+        }
+
+        localStorage.setItem('user', JSON.stringify(userData));
+        setUser(userData);
+        navigate('/dashboard');
+      } catch (err) {
+        console.error('Erro ao buscar usuário:', err);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setUser(null);
+      }
+    };
+
     const handleMessage = (event) => {
       // Verifica se a origem é a mesma do frontend
       if (event.origin !== window.location.origin) return;
       
       if (event.data.type === 'GOOGLE_LOGIN_SUCCESS') {
         const token = event.data.token;
-        
-        localStorage.setItem('token', token);
-        
-        fetch('https://gamevault-backend-kumn.onrender.com/api/auth/me', {
-          headers: { 'x-auth-token': token }
-        })
-          .then(res => res.json())
-          .then(userData => {
-            localStorage.setItem('user', JSON.stringify(userData));
-            setUser(userData);
-            navigate('/dashboard');
-          })
-          .catch(err => console.error('Erro ao buscar usuário:', err));
+        loadAuthenticatedUser(token);
       }
     };
 
@@ -117,6 +157,16 @@ function AppRoutes() {
             <PrivateRoute>
               <PrivateLayout>
                 <DashboardRAWG />
+              </PrivateLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/jogo/:igdbId"
+          element={
+            <PrivateRoute>
+              <PrivateLayout>
+                <GameDetails />
               </PrivateLayout>
             </PrivateRoute>
           }
@@ -166,7 +216,7 @@ function AppRoutes() {
           element={
             <PrivateRoute>
               <PrivateLayout>
-                <DashboardRAWG />
+                <Collection />
               </PrivateLayout>
             </PrivateRoute>
           }

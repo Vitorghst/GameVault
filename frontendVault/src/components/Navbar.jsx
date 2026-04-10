@@ -15,7 +15,7 @@ import {
   FiMenu,
   FiX,
 } from "react-icons/fi";
-import { SiRepublicofgamers } from "react-icons/si";
+import GameVaultLogo from "./GameVaultLogo";
 
 const Navbar = ({ children }) => {
   const { user, logout } = useAuth();
@@ -59,10 +59,7 @@ const Navbar = ({ children }) => {
         {/* Logo */}
         <div className="vertical-navbar-logo">
           <Link to="/dashboard" onClick={closeMenu}>
-            <span className="logo-icon">
-              <SiRepublicofgamers />
-            </span>
-            <span className="logo-text">GameVault</span>
+            <GameVaultLogo compact />
           </Link>
         </div>
 
